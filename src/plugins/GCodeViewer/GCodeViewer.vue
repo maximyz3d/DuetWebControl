@@ -374,7 +374,7 @@
 						</v-expansion-panel-header>
 						<v-expansion-panel-content>
 							<v-card>
-								<v-btn :disabled="loading" :title="$t('plugins.gcodeViewer.orbitObject.title')" @click="orbitObjectr" block class="mb-2" color="primary">{{$t('plugins.gcodeViewer.orbitObject.caption')}}</v-btn>
+								<v-btn :disabled="loading" :title="$t('plugins.gcodeViewer.orbitObject.title')" @click="orbitObject" block class="mb-2" color="primary">{{$t('plugins.gcodeViewer.orbitObject.caption')}}</v-btn>
 							</v-card>
 						</v-expansion-panel-content>
 					</v-expansion-panel>
@@ -913,17 +913,17 @@ export default {
 			}
 		},
 
-		async orbitObject() {
-		    try {
-		      if (this.viewer && typeof this.viewer.OrbitObject === 'function') {
-		        this.viewer.OrbitObject();
-		      } else {
-		        console.warn("Viewer or OrbitObject not ready yet");
-		      }
-		    } catch (err) {
-		      console.error("Failed to orbit object:", err);
+		orbitObject() {
+		  try {
+		    if (viewer && typeof viewer.OrbitObject === 'function') {
+		      viewer.OrbitObject();           // centers camera on the G-code bounds center
+		    } else {
+		      console.warn('Viewer or OrbitObject not ready yet');
 		    }
-		  },
+		  } catch (err) {
+		    console.error('Failed to orbit object:', err);
+		  }
+		},
 		clearScene() {
 			this.selectedFile = '';
 			viewer.clearScene(true);
@@ -1235,3 +1235,4 @@ export default {
 };
 
 </script>
+
