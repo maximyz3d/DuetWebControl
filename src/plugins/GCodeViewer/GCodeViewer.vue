@@ -367,6 +367,17 @@
 							</v-card>
 						</v-expansion-panel-content>
 					</v-expansion-panel>
+					<v-expansion-panel @click="scrollIntoView">
+						<v-expansion-panel-header :title="$t('plugins.gcodeViewer.camera.title')">
+							<v-icon class="mr-2">mdi-camera-outline</v-icon>
+							<strong>{{$t('plugins.gcodeViewer.camera.caption')}}</strong>
+						</v-expansion-panel-header>
+						<v-expansion-panel-content>
+							<v-card>
+								<v-btn :disabled="loading" :title="$t('plugins.gcodeViewer.orbitObject.title')" @click="orbitObjectr" block class="mb-2" color="primary">{{$t('plugins.gcodeViewer.orbitObject.caption')}}</v-btn>
+							</v-card>
+						</v-expansion-panel-content>
+					</v-expansion-panel>
 				</v-expansion-panels>
 			</v-navigation-drawer>
 			<div :class="[{ 'button-container-drawer': drawer }, scrubberClass]" v-show="!visualizingCurrentJob && scrubFileSize > 0">
@@ -901,6 +912,18 @@ export default {
 				//console.warn("No objects");
 			}
 		},
+
+		async orbitObject() {
+		    try {
+		      if (this.viewer && typeof this.viewer.OrbitObject === 'function') {
+		        this.viewer.OrbitObject();
+		      } else {
+		        console.warn("Viewer or OrbitObject not ready yet");
+		      }
+		    } catch (err) {
+		      console.error("Failed to orbit object:", err);
+		    }
+		  },
 		clearScene() {
 			this.selectedFile = '';
 			viewer.clearScene(true);
@@ -1210,4 +1233,5 @@ export default {
 		}
 	},
 };
+
 </script>
