@@ -912,8 +912,7 @@ export default {
 				//console.warn("No objects");
 			}
 		},
-
-		orbitObject() {
+		async orbitObject() {
 		  try {
 		    if (viewer && typeof viewer.orbitObject === 'function') {
 		      viewer.orbitObject();           // centers camera on the G-code bounds center
@@ -923,7 +922,7 @@ export default {
 		  } catch (err) {
 		    console.error('Failed to orbit object:', err);
 		  }
-		},
+		},	
 		clearScene() {
 			this.selectedFile = '';
 			viewer.clearScene(true);
@@ -1235,5 +1234,6 @@ export default {
 };
 
 </script>
+
 
 
