@@ -915,8 +915,8 @@ export default {
 
 		orbitObject() {
 		  try {
-		    if (viewer && typeof viewer.OrbitObject === 'function') {
-		      viewer.OrbitObject();           // centers camera on the G-code bounds center
+		    if (viewer && typeof viewer.orbitObject === 'function') {
+		      viewer.orbitObject();           // centers camera on the G-code bounds center
 		    } else {
 		      console.warn('Viewer or OrbitObject not ready yet');
 		    }
@@ -1235,4 +1235,5 @@ export default {
 };
 
 </script>
+
 
