@@ -6,7 +6,7 @@
 
 		<v-card-text class="pb-0">
 			<v-row class="pb-1" align="center" justify="center">
-				<v-col v-if="currentTool && currentTool.extruders.length > 1" cols="auto">
+				<v-col v-if="currentTool && currentTool.extruders.length > 1 && showMixingControls" cols="auto">
 					<p class="mb-1">
 						{{ $t("panel.extrude.mixRatio") }}
 					</p>
@@ -22,7 +22,7 @@
 				</v-col>
 				<v-col>
 					<p class="mb-1">
-						{{ $t("panel.extrude.amount", ["mm"]) }}
+						{{ $t("panel.extrude.amount", [amountUnit]) }}
 					</p>
 					<v-btn-toggle v-model="amount" mandatory class="d-flex">
 						<v-btn v-for="(savedAmount, index) in extruderAmounts" :key="index" :value="savedAmount"
@@ -33,7 +33,7 @@
 				</v-col>
 				<v-col>
 					<p class="mb-1">
-						{{ $t("panel.extrude.feedrate", ["mm/s"]) }}
+						{{ $t("panel.extrude.feedrate", [feedrateUnit]) }}
 					</p>
 					<v-btn-toggle v-model="feedrate" mandatory class="d-flex">
 						<v-btn v-for="(savedFeedrate, index) in extruderFeedrates" :key="index" :value="savedFeedrate"
@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import { MachineStatus, Tool } from "@duet3d/objectmodel";
+import { CodeChannel, MachineStatus, Tool } from "@duet3d/objectmodel";
 import Vue from "vue";
 
 import store from "@/store";
@@ -74,6 +74,9 @@ export default Vue.extend({
 	computed: {
 		uiFrozen(): boolean { return store.getters["uiFrozen"]; },
 		currentTool(): Tool | null { return store.getters["machine/model/currentTool"]; },
+		amountUnit(): string { return store.state.machine.model.inputs[CodeChannel.http]?.distanceUnit ?? "mm"; },
+		feedrateUnit(): string { return (store.state.machine.model.inputs[CodeChannel.http]?.distanceUnit ?? "mm") + "/s"; },
+		showMixingControls(): boolean { return store.state.machine.settings.showMixingControls; },
 		canExtrude(): boolean {
 			return (store.state.machine.model.state.status !== MachineStatus.off &&
 					store.state.machine.model.state.status !== MachineStatus.pausing &&
@@ -157,7 +160,7 @@ export default Vue.extend({
 			}
 
 			let amounts;
-			if (this.mixValue[0] === "mix") {
+			if (this.mixValue[0] === "mix" || !this.showMixingControls) {
 				// Split total amount to extrude evenly
 				amounts = [this.amount];
 			} else {
