@@ -19,7 +19,7 @@
       "@duet3d/motionanalysis": "~3.4.0",
       "@duet3d/objectmodel": "~3.6.0",
       "@mdi/font": "^7.4.47",
-      "@sindarius/gcodeviewer": "github:maximyz3d/npm_gcodeviewer#main",
+      "@sindarius/gcodeviewer": "file:../npm_gcodeviewer",
       "@vue/language-server": "~3.0.0",
       "chart.js": "^2.9.4",
       "chartjs-adapter-date-fns": "^1.0.0",
