@@ -974,13 +974,13 @@
       "view3D": "View 3D",
       "fullscreen": "Full Screen",
       "showConfiguration": "Show Viewer Configuration",
-      "resetCamera": {
+      "reset": {
         "caption": "Reset Camera",
         "title": "Reset camera to home position"
       },
       "camera": {
-      "caption": "Camera View",
-      "title": "Center Camera On Object"
+      "title": "Camera View",
+      "caption": "Center Camera On Object"
       },
       "cancelLoad": "Cancel File Loading",
       "reloadView": {
