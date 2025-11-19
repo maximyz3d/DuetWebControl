@@ -980,7 +980,11 @@
       },
       "camera": {
       "title": "Camera View",
-      "caption": "Center Camera On Object"
+      "caption": "Camera View"
+      },
+      "orbitObject": {
+      "title": "Orbit Object",
+      "caption": "Orbit Object"
       },
       "cancelLoad": "Cancel File Loading",
       "reloadView": {
