@@ -503,6 +503,11 @@ export default {
 			transparencyPercent: 50,
 			transparencyDebounce: null,
 			progressMode: false
+
+			// NEW: camera behavior switches
+    		followTool: true,           // default: camera follows tool
+    		topViewLock: true,          // default: locked top view
+    		followPathDirection: false  // default: don’t spin with path
 		};
 	},
 	computed: {
@@ -1264,6 +1269,7 @@ export default {
 };
 
 </script>
+
 
 
 
