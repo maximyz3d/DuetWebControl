@@ -378,6 +378,7 @@
 								<v-switch v-model="followTool"         class="mt-2" label="Follow Tool"                     :disabled="loading"                          inset dense />
     							<v-switch v-model="topViewLock"        class="mt-2" label="Top View Lock"                  :disabled="loading || !followTool"           inset dense />
     							<v-switch v-model="followPathDirection" class="mt-2" label="Camera Follows Path Direction" :disabled="loading || !followTool || !topViewLock" inset dense />
+                                <v-switch v-model="lockFrontDirection" class="mt-2" label="Lock Front Orientation" :disabled="loading || !followTool || !topViewLock || followPathDirection" inset dense />
 							</v-card>
 						</v-expansion-panel-content>
 					</v-expansion-panel>
@@ -508,6 +509,7 @@ export default {
     		followTool: true,           // default: camera follows tool
     		topViewLock: true,          // default: locked top view
     		followPathDirection: false  // default: don’t spin with path
+			lockFrontDirection: true     // NEW: lock global orientation by default
 		};
 	},
 	computed: {
@@ -673,6 +675,9 @@ export default {
 		if (typeof viewer.setFollowPathDirection === 'function') {
 			viewer.setFollowPathDirection(this.followPathDirection);
 		}
+		if (typeof viewer.setLockFrontDirection === 'function') {
+      		viewer.setLockFrontDirection(this.lockFrontDirection);
+    	}
 	
 		viewer.simulationMultiplier = 1;
 		viewer.buildObjects.objectCallback = this.objectSelectionCallback;
@@ -1106,6 +1111,11 @@ export default {
 				viewer.setFollowPathDirection(newVal);
 			}
 		},
+		lockFrontDirection(newVal) {
+      		if (viewer && typeof viewer.setLockFrontDirection === 'function') {
+        		viewer.setLockFrontDirection(newVal);
+      		}
+    	},
 		'persistTravels': function(newVal) { 
 			this.showTravelLines = true
 			viewer.gcodeProcessor.setTravelPersistence(newVal);
@@ -1269,6 +1279,7 @@ export default {
 };
 
 </script>
+
 
 
 
