@@ -375,6 +375,9 @@
 						<v-expansion-panel-content>
 							<v-card>
 								<v-btn :disabled="loading" :title="$t('plugins.gcodeViewer.orbitObject.title')" @click="orbitObject" block class="mb-2" color="primary">{{$t('plugins.gcodeViewer.orbitObject.caption')}}</v-btn>
+								<v-switch v-model="followTool"         class="mt-2" label="Follow Tool"                     :disabled="loading"                          inset dense />
+    							<v-switch v-model="topViewLock"        class="mt-2" label="Top View Lock"                  :disabled="loading || !followTool"           inset dense />
+    							<v-switch v-model="followPathDirection" class="mt-2" label="Camera Follows Path Direction" :disabled="loading || !followTool || !topViewLock" inset dense />
 							</v-card>
 						</v-expansion-panel-content>
 					</v-expansion-panel>
@@ -654,6 +657,17 @@ export default {
 		viewer = new gcodeViewer(this.$refs.viewerCanvas);
 		viewer.fileData = "";
 		await viewer.init();
+
+		// NEW: initialize camera behavior based on switches
+		if (typeof viewer.setTopFollow === 'function') {
+			viewer.setTopFollow(this.followTool);
+		}
+		if (typeof viewer.setTopViewLock === 'function') {
+			viewer.setTopViewLock(this.topViewLock);
+		}
+		if (typeof viewer.setFollowPathDirection === 'function') {
+			viewer.setFollowPathDirection(this.followPathDirection);
+		}
 	
 		viewer.simulationMultiplier = 1;
 		viewer.buildObjects.objectCallback = this.objectSelectionCallback;
@@ -1071,6 +1085,22 @@ export default {
 		'showTravelLines': (newVal) => {
 			viewer.toggleTravels(newVal);
 		},
+		// NEW: camera behavior switches
+		followTool(newVal) {
+			if (viewer && typeof viewer.setTopFollow === 'function') {
+				viewer.setTopFollow(newVal);
+			}
+		},
+		topViewLock(newVal) {
+			if (viewer && typeof viewer.setTopViewLock === 'function') {
+				viewer.setTopViewLock(newVal);
+			}
+		},
+		followPathDirection(newVal) {
+			if (viewer && typeof viewer.setFollowPathDirection === 'function') {
+				viewer.setFollowPathDirection(newVal);
+			}
+		},
 		'persistTravels': function(newVal) { 
 			this.showTravelLines = true
 			viewer.gcodeProcessor.setTravelPersistence(newVal);
@@ -1234,6 +1264,7 @@ export default {
 };
 
 </script>
+
 
 
 
