@@ -502,7 +502,7 @@ export default {
 			perimeterOnly: false,
 			transparencyPercent: 50,
 			transparencyDebounce: null,
-			progressMode: false
+			progressMode: false,
 
 			// NEW: camera behavior switches
     		followTool: true,           // default: camera follows tool
@@ -1269,6 +1269,7 @@ export default {
 };
 
 </script>
+
 
 
 
