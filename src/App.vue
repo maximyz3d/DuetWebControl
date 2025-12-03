@@ -109,34 +109,44 @@ import store from "@/store";
 import { DashboardMode } from "@/store/settings";
 import { isPrinting } from "@/utils/enums";
 import { LogType } from "./utils/logging";
+import { lockedLandingPage, restrictedRoutes } from "@/utils/restrictedRoutes";
 
 export default Vue.extend({
 	computed: {
 		name(): string { return store.state.machine.model.network.name; },
 		isConnecting(): boolean { return store.state.isConnecting || store.state.machine.isReconnecting; },
 		status(): MachineStatus { return store.state.machine.model.state.status; },
-		iconMenu(): boolean { return store.state.settings.iconMenu; },
-		jobProgress(): number { return store.getters["machine/model/jobProgress"]; },
-		injectedComponents(): Array<{ name: string, component: Component }> { return store.state.uiInjection.injectedComponents; },
-		model(): ObjectModel { return store.state.machine.model; },
-		categories(): Array<MenuCategory> {
-			return Object.keys(Menu)
-				.map(key => Menu[key])
-				.filter(item => item.pages.some(page => page.condition && !store.state.settings.hiddenMenuItems.includes(page.path)));
-		},
-		currentPageCondition(): boolean {
-			const currentRoute = this.$route;
-			let checkRoute = (route: MenuItem, isChild = false) => {
-				let flag = (route.path === currentRoute.path && route.condition);
-				if (!flag && isChild) {
-					let curPath = currentRoute.path.replace(/\/$/, "");
-					if (curPath.endsWith(route.path))
-						flag = (curPath.substring(0, curPath.length - route.path.length) + route.path === curPath && route.condition)
-				}
-				return flag;
-			};
-			return Routes.some(route => checkRoute(route as MenuItem));
-		},
+                iconMenu(): boolean { return store.state.settings.iconMenu; },
+                jobProgress(): number { return store.getters["machine/model/jobProgress"]; },
+                injectedComponents(): Array<{ name: string, component: Component }> { return store.state.uiInjection.injectedComponents; },
+                model(): ObjectModel { return store.state.machine.model; },
+                effectiveHiddenMenuItems(): Set<string> {
+                        const hiddenItems = new Set<string>(store.state.settings.hiddenMenuItems);
+
+                        if (store.state.uiLocked) {
+                                restrictedRoutes.forEach(path => hiddenItems.add(path));
+                        }
+
+                        return hiddenItems;
+                },
+                categories(): Array<MenuCategory> {
+                        return Object.keys(Menu)
+                                .map(key => Menu[key])
+                                .filter(item => item.pages.some(page => page.condition && !this.effectiveHiddenMenuItems.has(page.path)));
+                },
+                currentPageCondition(): boolean {
+                        const currentRoute = this.$route;
+                        let checkRoute = (route: MenuItem, isChild = false) => {
+                                let flag = (route.path === currentRoute.path && route.condition && !this.effectiveHiddenMenuItems.has(route.path));
+                                if (!flag && isChild) {
+                                        let curPath = currentRoute.path.replace(/\/$/, "");
+                                        if (curPath.endsWith(route.path))
+                                                flag = (curPath.substring(0, curPath.length - route.path.length) + route.path === curPath && route.condition && !this.effectiveHiddenMenuItems.has(route.path))
+                                }
+                                return flag;
+                        };
+                        return Routes.some(route => checkRoute(route as MenuItem));
+                },
 		darkTheme(): boolean { return store.state.settings.darkTheme; },
 		isFFForUnset(): boolean {
 			if (store.state.settings.dashboardMode === DashboardMode.default) {
@@ -169,9 +179,9 @@ export default Vue.extend({
 			}
 			return true;
 		},
-		getPages(category: MenuCategory): Array<MenuItem> {
-			return category.pages.filter(page => page.condition && !store.state.settings.hiddenMenuItems.includes(page.path));
-		},
+                getPages(category: MenuCategory): Array<MenuItem> {
+                        return category.pages.filter(page => page.condition && !this.effectiveHiddenMenuItems.has(page.path));
+                },
 		updateTitle(): void {
 			if (this.status === MachineStatus.disconnected) {
 				document.title = `(${this.name})`;
@@ -196,15 +206,17 @@ export default Vue.extend({
 		// Attempt to load the settings
 		store.dispatch("settings/load");
 
-		// Validate navigation
-		Vue.prototype.$vuetify = this.$vuetify;
-		this.$router.beforeEach((to: Route, from: Route, next: NavigationGuardNext) => {
-			if (Routes.some(route => route.path === to.path && !(route as MenuItem).condition)) {
-				next("/");
-			} else {
-				next();
-			}
-		});
+                // Validate navigation
+                Vue.prototype.$vuetify = this.$vuetify;
+                this.$router.beforeEach((to: Route, from: Route, next: NavigationGuardNext) => {
+                        const isBlockedRoute = Routes.some(route => route.path === to.path && (!(route as MenuItem).condition || this.effectiveHiddenMenuItems.has(route.path)));
+
+                        if (isBlockedRoute) {
+                                next(lockedLandingPage);
+                        } else {
+                                next();
+                        }
+                });
 
 		// Set up Piecon
 		Piecon.setOptions({
@@ -215,11 +227,11 @@ export default Vue.extend({
 		});
 	},
 	watch: {
-		currentPageCondition(to: boolean) {
-			if (!to) {
-				this.$router.push("/");
-			}
-		},
+                currentPageCondition(to: boolean) {
+                        if (!to) {
+                                this.$router.push(lockedLandingPage);
+                        }
+                },
 		darkTheme(to: boolean) {
 			this.$vuetify.theme.dark = to;
 		},

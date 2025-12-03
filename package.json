@@ -14,6 +14,10 @@
       "report": "vue-cli-service build --report"
    },
    "dependencies": {
+      "@babylonjs/core": "^6.57.1",
+      "@babylonjs/gui": "^6.57.1",
+      "@babylonjs/loaders": "^6.57.1",
+      "@babylonjs/materials": "^6.57.1",
       "@duet3d/connectors": "~3.6.0",
       "@duet3d/monacotokens": "~3.6.0",
       "@duet3d/motionanalysis": "~3.4.0",
@@ -24,6 +28,7 @@
       "chart.js": "^2.9.4",
       "chartjs-adapter-date-fns": "^1.0.0",
       "date-fns": "^2.30.0",
+      "d3": "^7.9.0",
       "file-saver": "^2.0.5",
       "jszip": "^3.10.1",
       "monaco-editor": "^0.52.0",
