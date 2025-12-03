@@ -7,6 +7,7 @@ import store from "@/store";
 import Status from "./Control/Status.vue";
 import Dashboard from "./Control/Dashboard.vue";
 import Console from "./Control/Console.vue";
+import BtnCmd from "./Control/BtnCmd.vue";
 
 import Filaments from "./Files/Filaments.vue";
 import Jobs from "./Files/Jobs.vue";
@@ -89,13 +90,19 @@ export interface MenuCategory {
  */
 export const Menu = Vue.observable<Record<string, MenuCategory>>({
 	Control: {
-		icon: "mdi-tune",
-		caption: "menu.control.caption",
-		pages: [
-			{
-				icon: "mdi-list-status",
-				caption: "menu.control.status",
-				condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
+                icon: "mdi-tune",
+                caption: "menu.control.caption",
+                pages: [
+                        {
+                                icon: "mdi-gesture-tap-button",
+                                caption: "menu.control.buttonCommands",
+                                path: "/BtnCmd",
+                                component: BtnCmd
+                        },
+                        {
+                                icon: "mdi-list-status",
+                                caption: "menu.control.status",
+                                condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
 				path: "/Status",
 				component: Status
 			},

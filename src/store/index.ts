@@ -22,6 +22,23 @@ Vue.use(Vuex);
 
 const defaultUsername = "", defaultPassword = "reprap";
 
+const uiLockStorageKey = "dwc-ui-locked";
+
+function loadUiLocked(): boolean {
+        if (typeof localStorage === "undefined") {
+                return true;
+        }
+
+        const storedValue = localStorage.getItem(uiLockStorageKey);
+        return storedValue !== "false";
+}
+
+function persistUiLocked(locked: boolean): void {
+        if (typeof localStorage !== "undefined") {
+                localStorage.setItem(uiLockStorageKey, locked ? "true" : "false");
+        }
+}
+
 const defaultMachineModule = machine(null);
 const machines: Record<string, MachineModule> = {
 	[defaultMachine]: defaultMachineModule
@@ -78,10 +95,15 @@ export interface InternalRootState {
 	*/
 	oskEnabled: boolean;
 	
-	/**
-	* Bottom margin to add for the on-screen keyboard
-	*/
-	bottomMargin: number;
+        /**
+        * Bottom margin to add for the on-screen keyboard
+        */
+        bottomMargin: number;
+
+        /**
+        * Indicates if the UI is locked down to the Button Commands view
+        */
+        uiLocked: boolean;
 }
 
 export interface RootState extends InternalRootState {
@@ -105,11 +127,12 @@ const store = new Vuex.Store<InternalRootState>({
 		passwordRequired: false,
 		selectedMachine: defaultMachine,
 		loadingDwcPlugins: false,
-		loadedDwcPlugins: [],
-		hideCodeReplyNotifications: false,
-		oskEnabled: false,
-		bottomMargin: 0
-	},
+                loadedDwcPlugins: [],
+                hideCodeReplyNotifications: false,
+                oskEnabled: false,
+                bottomMargin: 0,
+                uiLocked: loadUiLocked()
+        },
 	getters: {
 		connectedMachines: () => Object.keys(machines).filter(machine => machine !== defaultMachine),
 		isConnected: state => state.selectedMachine !== defaultMachine && !(state as RootState).machines[state.selectedMachine].isReconnecting,
@@ -543,15 +566,25 @@ const store = new Vuex.Store<InternalRootState>({
 			state.oskEnabled = true;
 		},
 		
-		/**
-		* Set the new bottom margin (reserved for OSK plugins)
-		* @param state Vuex state
-		* @param value New bottom margin in px
-		*/
-		setBottomMargin(state, value: number) {
-			state.bottomMargin = value;
-		}
-	},
+                /**
+                * Set the new bottom margin (reserved for OSK plugins)
+                * @param state Vuex state
+                * @param value New bottom margin in px
+                */
+                setBottomMargin(state, value: number) {
+                        state.bottomMargin = value;
+                },
+
+                /**
+                * Toggle the locked-down UI mode
+                * @param state Vuex state
+                * @param locked Whether the UI should be locked
+                */
+                setUiLocked(state, locked: boolean) {
+                        state.uiLocked = locked;
+                        persistUiLocked(locked);
+                }
+        },
 	modules: {
 		// machine will provide the currently selected machine
 		
