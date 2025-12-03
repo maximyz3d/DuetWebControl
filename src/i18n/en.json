@@ -503,7 +503,8 @@
       "caption": "Control",
       "status": "Status",
       "dashboard": "Dashboard",
-      "console": "Console"
+      "console": "Console",
+      "buttonCommands": "Button Commands"
     },
     "job": {
       "caption": "Job",
