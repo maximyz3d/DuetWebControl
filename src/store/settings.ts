@@ -27,6 +27,18 @@ export enum WebcamFlip {
 	Both = "both"
 }
 
+export const lockedMenuItems = [
+        "/",
+        "/Status",
+        "/Job/Webcam",
+        "/Files/Macros",
+        "/Files/System",
+        "/Settings/General",
+        "/Settings/Machine",
+        "/Settings/Plugins",
+        "/Plugins/ObjectModel"
+];
+
 export interface SettingsState {
 	/**
 	 * Configured language
@@ -103,10 +115,15 @@ export interface SettingsState {
 	 */
 	cacheSaveDelay: number;
 
-	/**
-	 * Hidden menu items
-	 */
-	hiddenMenuItems: Array<string>;
+        /**
+         * Hidden menu items
+         */
+        hiddenMenuItems: Array<string>;
+
+        /**
+         * Indicates if the UI lock has been cleared
+         */
+        uiUnlocked: boolean;
 
 	/**
 	 * Notification settings
@@ -195,8 +212,14 @@ export interface SettingsState {
 }
 
 export default {
-	namespaced: true,
-	state: {
+        namespaced: true,
+        getters: {
+                effectiveHiddenMenuItems(state): Array<string> {
+                        const extraItems = state.uiUnlocked ? [] : lockedMenuItems;
+                        return Array.from(new Set([...state.hiddenMenuItems, ...extraItems]));
+                }
+        },
+        state: {
 		language: getBrowserLocale(),
 		lastHostname: location.host,
 
@@ -215,7 +238,8 @@ export default {
 		cacheStorageLocal: localStorageSupported,
 		cacheSaveDelay: 1000,
 
-		hiddenMenuItems: [],
+                hiddenMenuItems: [],
+                uiUnlocked: getLocalSetting("uiUnlocked", false),
 
 		notifications: {
 			errorsPersistent: true,
@@ -304,9 +328,10 @@ export default {
 			}
 		},
 		async reset({ rootState, dispatch }) {
-			// Delete settings
-			removeLocalSetting("settings");
-			removeLocalSetting(`machines/${rootState.selectedMachine}`);
+                        // Delete settings
+                        removeLocalSetting("settings");
+                        removeLocalSetting("uiUnlocked");
+                        removeLocalSetting(`machines/${rootState.selectedMachine}`);
 			try {
 				await dispatch("machine/delete", Path.dwcSettingsFile, { root: true });
 			} catch (e) {
@@ -369,16 +394,19 @@ export default {
 				state.cacheSaveDelay = 1000;
 			}
 		},
-		update(state, payload: any) {
-			if (payload.language && i18n.locale !== payload.language) {
-				i18n.locale = payload.language;
-			}
-			if (payload.plugins) {
-				state.plugins = payload.plugins;
-				delete payload.plugins;
-			}
-			patch(state, payload, true);
-		},
+                update(state, payload: any) {
+                        if (payload.language && i18n.locale !== payload.language) {
+                                i18n.locale = payload.language;
+                        }
+                        if (payload.uiUnlocked !== undefined) {
+                                setLocalSetting("uiUnlocked", payload.uiUnlocked);
+                        }
+                        if (payload.plugins) {
+                                state.plugins = payload.plugins;
+                                delete payload.plugins;
+                        }
+                        patch(state, payload, true);
+                },
 
 		dwcPluginLoaded(state, plugin: string) {
 			if (!state.enabledPlugins.includes(plugin)) {

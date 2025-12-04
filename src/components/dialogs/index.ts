@@ -16,6 +16,7 @@ import NewDirectoryDialog from "./NewDirectoryDialog.vue";
 import PluginInstallDialog from "./PluginInstallDialog.vue";
 import ResetHeaterFaultDialog from "./ResetHeaterFaultDialog.vue";
 import FileTransferDialog from "./FileTransferDialog.vue";
+import UnlockDialog from "./UnlockDialog.vue";
 
 Vue.component("config-updated-dialog", ConfigUpdatedDialog);
 Vue.component("confirm-dialog", ConfirmDialog);
@@ -33,3 +34,4 @@ Vue.component("new-directory-dialog", NewDirectoryDialog);
 Vue.component("plugin-install-dialog", PluginInstallDialog);
 Vue.component("reset-heater-fault-dialog", ResetHeaterFaultDialog);
 Vue.component("file-transfer-dialog", FileTransferDialog);
+Vue.component("unlock-dialog", UnlockDialog);

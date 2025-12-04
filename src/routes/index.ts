@@ -3,10 +3,12 @@ import Vue, { Component } from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 
 import store from "@/store";
+import { lockedMenuItems } from "@/store/settings";
 
 import Status from "./Control/Status.vue";
 import Dashboard from "./Control/Dashboard.vue";
 import Console from "./Control/Console.vue";
+import BtnCmd from "./Control/BtnCmd.vue";
 
 import Filaments from "./Files/Filaments.vue";
 import Jobs from "./Files/Jobs.vue";
@@ -92,10 +94,17 @@ export const Menu = Vue.observable<Record<string, MenuCategory>>({
 		icon: "mdi-tune",
 		caption: "menu.control.caption",
 		pages: [
-			{
-				icon: "mdi-list-status",
-				caption: "menu.control.status",
-				condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
+                        {   
+                                icon: "mdi-gesture-tap-button",
+                                caption: "BtnCmd",
+                                translated: true,
+                                path: "/BtnCmd",
+                                component: BtnCmd
+                        },
+                        {
+                                icon: "mdi-list-status",
+                                caption: "menu.control.status",
+                                condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
 				path: "/Status",
 				component: Status
 			},
@@ -347,8 +356,8 @@ const router = new VueRouter({
 });
 
 for (const category in Menu) {
-	for (const page of Menu[category].pages) {
-		if (page.condition === undefined) {
+        for (const page of Menu[category].pages) {
+                if (page.condition === undefined) {
 			page.condition = true;
 		} else if (page.condition instanceof Function) {
 			Object.defineProperty(page, "condition", {
@@ -358,8 +367,18 @@ for (const category in Menu) {
 
 		router.addRoute(page);
 		Routes.push(page);
-	}
+        }
 }
+
+router.beforeEach((to, from, next) => {
+        if (!store.state.settings.uiUnlocked && lockedMenuItems.includes(to.path)) {
+                next("/BtnCmd");
+        } else if (Routes.some(route => route.path === to.path && !(route as MenuItem).condition)) {
+                next("/BtnCmd");
+        } else {
+                next();
+        }
+});
 
 router.addRoute(
     {

@@ -36,12 +36,16 @@
 			<v-app-bar-nav-icon v-show="!showBottomNavigation" @click.stop="drawer = !drawer">
 				<v-icon>mdi-menu</v-icon>
 			</v-app-bar-nav-icon>
-			<v-toolbar-title class="px-1">
-				<a href="javascript:void(0)" id="title">
-					{{ name }}
-				</a>
-			</v-toolbar-title>
-			<connect-btn v-if="showConnectButton" class="hidden-xs-only ml-3" />
+                <v-toolbar-title class="px-1">
+                        <a href="javascript:void(0)" id="title">
+                                {{ name }}
+                        </a>
+                </v-toolbar-title>
+                <v-btn v-if="!isUnlocked" color="primary" class="ml-2" small @click="unlockDialogShown = true">
+                        <v-icon left>mdi-lock</v-icon>
+                        Unlock
+                </v-btn>
+                <connect-btn v-if="showConnectButton" class="hidden-xs-only ml-3" />
 
 			<v-spacer />
 
@@ -62,10 +66,10 @@
 			<v-divider class="hidden-sm-and-down" />
 
 			<v-container fluid>
-				<keep-alive>
-					<router-view />
-				</keep-alive>
-			</v-container>
+                                <keep-alive>
+                                        <router-view @request-unlock="unlockDialogShown = true" />
+                                </keep-alive>
+                </v-container>
 		</v-main>
 
 		<notification-display />
@@ -90,9 +94,10 @@
 		<connect-dialog />
 		<connection-dialog />
 		<file-transfer-dialog />
-		<message-box-dialog />
-		<plugin-install-dialog />
-		<incompatible-versions-dialog />
+                <message-box-dialog />
+                <plugin-install-dialog />
+                <incompatible-versions-dialog />
+                <unlock-dialog v-model="unlockDialogShown" @unlocked="unlock" />
 
 		<component v-for="component in injectedComponentNames" :is="component" :key="component" />
 	</v-app>
@@ -102,7 +107,6 @@
 import ObjectModel, { MachineMode, MachineStatus } from "@duet3d/objectmodel";
 import Piecon from "piecon";
 import Vue, { Component } from "vue";
-import { Route, NavigationGuardNext } from "vue-router";
 
 import { Menu, MenuCategory, MenuItem, Routes } from "@/routes";
 import store from "@/store";
@@ -110,22 +114,26 @@ import { DashboardMode } from "@/store/settings";
 import { isPrinting } from "@/utils/enums";
 import { LogType } from "./utils/logging";
 
+const defaultHomeRoute = "/BtnCmd";
+
 export default Vue.extend({
 	computed: {
 		name(): string { return store.state.machine.model.network.name; },
 		isConnecting(): boolean { return store.state.isConnecting || store.state.machine.isReconnecting; },
 		status(): MachineStatus { return store.state.machine.model.state.status; },
-		iconMenu(): boolean { return store.state.settings.iconMenu; },
-		jobProgress(): number { return store.getters["machine/model/jobProgress"]; },
-		injectedComponents(): Array<{ name: string, component: Component }> { return store.state.uiInjection.injectedComponents; },
-		model(): ObjectModel { return store.state.machine.model; },
-		categories(): Array<MenuCategory> {
-			return Object.keys(Menu)
-				.map(key => Menu[key])
-				.filter(item => item.pages.some(page => page.condition && !store.state.settings.hiddenMenuItems.includes(page.path)));
-		},
-		currentPageCondition(): boolean {
-			const currentRoute = this.$route;
+                iconMenu(): boolean { return store.state.settings.iconMenu; },
+                jobProgress(): number { return store.getters["machine/model/jobProgress"]; },
+                injectedComponents(): Array<{ name: string, component: Component }> { return store.state.uiInjection.injectedComponents; },
+                model(): ObjectModel { return store.state.machine.model; },
+                isUnlocked(): boolean { return store.state.settings.uiUnlocked; },
+                hiddenMenuItems(): Array<string> { return store.getters["settings/effectiveHiddenMenuItems"]; },
+                categories(): Array<MenuCategory> {
+                        return Object.keys(Menu)
+                                .map(key => Menu[key])
+                                .filter(item => item.pages.some(page => page.condition && !this.hiddenMenuItems.includes(page.path)));
+                },
+                currentPageCondition(): boolean {
+                        const currentRoute = this.$route;
 			let checkRoute = (route: MenuItem, isChild = false) => {
 				let flag = (route.path === currentRoute.path && route.condition);
 				if (!flag && isChild) {
@@ -154,37 +162,42 @@ export default Vue.extend({
 			return store.state.bottomMargin;
 		}
 	},
-	data() {
-		return {
-			drawer: this.$vuetify.breakpoint.lgAndUp,
-			injectedComponentNames: new Array<string>(),
-			showConnectButton: process.env.NODE_ENV === "development"
-		};
-	},
-	methods: {
-		isExpanded(category: MenuCategory): boolean {
-			if (this.$vuetify.breakpoint.smAndDown) {
-				const route = this.$route;
-				return category.pages.some(page => page.path === route.path);
-			}
-			return true;
-		},
-		getPages(category: MenuCategory): Array<MenuItem> {
-			return category.pages.filter(page => page.condition && !store.state.settings.hiddenMenuItems.includes(page.path));
-		},
-		updateTitle(): void {
-			if (this.status === MachineStatus.disconnected) {
-				document.title = `(${this.name})`;
+        data() {
+                return {
+                        drawer: this.$vuetify.breakpoint.lgAndUp,
+                        injectedComponentNames: new Array<string>(),
+                        showConnectButton: process.env.NODE_ENV === "development",
+                        unlockDialogShown: false
+                };
+        },
+        methods: {
+                isExpanded(category: MenuCategory): boolean {
+                        if (this.$vuetify.breakpoint.smAndDown) {
+                                const route = this.$route;
+                                return category.pages.some(page => page.path === route.path);
+                        }
+                        return true;
+                },
+                getPages(category: MenuCategory): Array<MenuItem> {
+                        return category.pages.filter(page => page.condition && !this.hiddenMenuItems.includes(page.path));
+                },
+                updateTitle(): void {
+                        if (this.status === MachineStatus.disconnected) {
+                                document.title = `(${this.name})`;
 			} else {
 				const jobProgress = this.jobProgress;
 				const title = ((jobProgress > 0 && isPrinting(this.status)) ? `(${(jobProgress * 100).toFixed(1)}%) ` : '') + this.name;
-				if (document.title !== title) {
-					document.title = title;
-				}
-			}
-		},
-	},
-	mounted() {
+                                if (document.title !== title) {
+                                        document.title = title;
+                                }
+                        }
+                },
+                unlock(): void {
+                        store.commit("settings/update", { uiUnlocked: true });
+                        this.unlockDialogShown = false;
+                },
+        },
+        mounted() {
 		// Attempt to disconnect from every machine when the page is being unloaded
 		window.addEventListener("unload", () => store.dispatch("disconnectAll"));
 
@@ -193,18 +206,10 @@ export default Vue.extend({
 			store.dispatch("connect");
 		}
 
-		// Attempt to load the settings
-		store.dispatch("settings/load");
+                // Attempt to load the settings
+                store.dispatch("settings/load");
 
-		// Validate navigation
-		Vue.prototype.$vuetify = this.$vuetify;
-		this.$router.beforeEach((to: Route, from: Route, next: NavigationGuardNext) => {
-			if (Routes.some(route => route.path === to.path && !(route as MenuItem).condition)) {
-				next("/");
-			} else {
-				next();
-			}
-		});
+                Vue.prototype.$vuetify = this.$vuetify;
 
 		// Set up Piecon
 		Piecon.setOptions({
@@ -215,11 +220,11 @@ export default Vue.extend({
 		});
 	},
 	watch: {
-		currentPageCondition(to: boolean) {
-			if (!to) {
-				this.$router.push("/");
-			}
-		},
+                currentPageCondition(to: boolean) {
+                        if (!to) {
+                                this.$router.push(defaultHomeRoute);
+                        }
+                },
 		darkTheme(to: boolean) {
 			this.$vuetify.theme.dark = to;
 		},
