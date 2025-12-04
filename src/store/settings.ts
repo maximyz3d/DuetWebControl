@@ -29,7 +29,9 @@ export enum WebcamFlip {
 
 export const lockedMenuItems = [
         "/",
+        "/Dashboard",
         "/Status",
+        "/Job/Status",
         "/Job/Webcam",
         "/Files/Macros",
         "/Files/System",

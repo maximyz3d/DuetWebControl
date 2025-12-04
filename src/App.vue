@@ -41,10 +41,6 @@
                                 {{ name }}
                         </a>
                 </v-toolbar-title>
-                <v-btn v-if="!isUnlocked" color="primary" class="ml-2" small @click="unlockDialogShown = true">
-                        <v-icon left>mdi-lock</v-icon>
-                        Unlock
-                </v-btn>
                 <connect-btn v-if="showConnectButton" class="hidden-xs-only ml-3" />
 
 			<v-spacer />
@@ -125,7 +121,6 @@ export default Vue.extend({
                 jobProgress(): number { return store.getters["machine/model/jobProgress"]; },
                 injectedComponents(): Array<{ name: string, component: Component }> { return store.state.uiInjection.injectedComponents; },
                 model(): ObjectModel { return store.state.machine.model; },
-                isUnlocked(): boolean { return store.state.settings.uiUnlocked; },
                 hiddenMenuItems(): Array<string> { return store.getters["settings/effectiveHiddenMenuItems"]; },
                 categories(): Array<MenuCategory> {
                         return Object.keys(Menu)

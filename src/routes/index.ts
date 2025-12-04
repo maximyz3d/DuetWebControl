@@ -9,6 +9,7 @@ import Status from "./Control/Status.vue";
 import Dashboard from "./Control/Dashboard.vue";
 import Console from "./Control/Console.vue";
 import BtnCmd from "./Control/BtnCmd.vue";
+import Unlock from "./Control/Unlock.vue";
 
 import Filaments from "./Files/Filaments.vue";
 import Jobs from "./Files/Jobs.vue";
@@ -94,7 +95,7 @@ export const Menu = Vue.observable<Record<string, MenuCategory>>({
 		icon: "mdi-tune",
 		caption: "menu.control.caption",
 		pages: [
-                        {   
+                        {
                                 icon: "mdi-gesture-tap-button",
                                 caption: "BtnCmd",
                                 translated: true,
@@ -102,18 +103,25 @@ export const Menu = Vue.observable<Record<string, MenuCategory>>({
                                 component: BtnCmd
                         },
                         {
+                                icon: "mdi-lock",
+                                caption: "Unlock",
+                                translated: true,
+                                path: "/Unlock",
+                                component: Unlock
+                        },
+                        {
                                 icon: "mdi-list-status",
                                 caption: "menu.control.status",
                                 condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
-				path: "/Status",
-				component: Status
-			},
-			{
-				icon: "mdi-view-dashboard",
-				caption: "menu.control.dashboard",
-				path: "/",
-				component: Dashboard
-			},
+                                path: "/Status",
+                                component: Status
+                        },
+                        {
+                                icon: "mdi-view-dashboard",
+                                caption: "menu.control.dashboard",
+                                path: "/Dashboard",
+                                component: Dashboard
+                        },
 			{
 				icon: "mdi-code-tags",
 				caption: "menu.control.console",
@@ -358,17 +366,22 @@ const router = new VueRouter({
 for (const category in Menu) {
         for (const page of Menu[category].pages) {
                 if (page.condition === undefined) {
-			page.condition = true;
-		} else if (page.condition instanceof Function) {
+                        page.condition = true;
+                } else if (page.condition instanceof Function) {
 			Object.defineProperty(page, "condition", {
 				get: page.condition as (() => boolean)
 			});
 		}
 
-		router.addRoute(page);
-		Routes.push(page);
+                router.addRoute(page);
+                Routes.push(page);
         }
 }
+
+router.addRoute({
+        path: "/",
+        redirect: "/BtnCmd"
+});
 
 router.beforeEach((to, from, next) => {
         if (!store.state.settings.uiUnlocked && lockedMenuItems.includes(to.path)) {
