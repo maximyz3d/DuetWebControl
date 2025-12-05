@@ -101,12 +101,17 @@ export interface SettingsState {
 	/**
 	 * Time to wait after a cache change before it is saved
 	 */
-	cacheSaveDelay: number;
+        cacheSaveDelay: number;
 
-	/**
-	 * Hidden menu items
-	 */
-	hiddenMenuItems: Array<string>;
+        /**
+         * Hidden menu items
+         */
+        hiddenMenuItems: Array<string>;
+
+        /**
+         * Whether the interface is locked to the basic user mode
+         */
+        locked: boolean;
 
 	/**
 	 * Notification settings
@@ -191,8 +196,24 @@ export interface SettingsState {
 	/**
 	 * Custom plugin setting fields
 	 */
-	plugins: Record<string, any>
+        plugins: Record<string, any>
 }
+
+export const DefaultLockedMenuItems = [
+        "/",
+        "/Status",
+        "/Job/Status",
+        "/Job/Webcam",
+        "/Console",
+        "/Settings/General",
+        "/Settings/Machine",
+        "/Settings/Plugins",
+        "/Plugins/ObjectModel",
+        "/Plugins/InputShaping",
+        "/Files/Filaments",
+        "/Files/Macros",
+        "/Files/System"
+];
 
 export default {
 	namespaced: true,
@@ -212,10 +233,11 @@ export default {
 
 		settingsStorageLocal: false,
 		settingsSaveDelay: 500,
-		cacheStorageLocal: localStorageSupported,
-		cacheSaveDelay: 1000,
+                cacheStorageLocal: localStorageSupported,
+                cacheSaveDelay: 1000,
 
-		hiddenMenuItems: [],
+                hiddenMenuItems: [...DefaultLockedMenuItems],
+                locked: true,
 
 		notifications: {
 			errorsPersistent: true,
@@ -238,12 +260,17 @@ export default {
 			flip: "none"
 		},
 
-		enabledPlugins: [
-			"HeightMap",
-			"ObjectModelBrowser"
-		],
-		plugins: {}
-	},
+                enabledPlugins: [
+                        "HeightMap",
+                        "ObjectModelBrowser"
+                ],
+                plugins: {}
+        },
+        getters: {
+                activeHiddenMenuItems(state): Array<string> {
+                        return state.locked ? DefaultLockedMenuItems : state.hiddenMenuItems;
+                }
+        },
 	actions: {
 		async applyDefaults({ rootState, state, commit, dispatch }) {
 			// Load settings that are enabled by default
