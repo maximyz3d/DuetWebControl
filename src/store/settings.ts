@@ -200,19 +200,19 @@ export interface SettingsState {
 }
 
 export const DefaultHiddenMenuItems: Array<string> = [
-        "/Console",
-        "/Files/Filaments",
-        "/Files/Macros",
-        "/Files/System",
-        "/Settings/General",
-        "/Settings/Machine",
-        "/Settings/Plugins",
-        "/Plugins/ObjectModel",
-        "/Plugins/InputShaping",
-        "/Status",
-        "/Job/Status",
-        "/Job/Webcam",
-        "/Control/Dashboard"
+"/Console",
+"/Files/Filaments",
+"/Files/Macros",
+"/Files/System",
+"/Settings/General",
+"/Settings/Machine",
+"/Settings/Plugins",
+"/Plugins/ObjectModel",
+"/Plugins/InputShaping",
+"/Status",
+"/Job/Status",
+"/Job/Webcam",
+"/"
 ];
 
 export default {

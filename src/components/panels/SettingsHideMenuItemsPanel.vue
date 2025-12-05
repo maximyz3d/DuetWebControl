@@ -64,7 +64,7 @@ export default Vue.extend({
                 hideMachineSettings: createHiddenComputed("/Settings/Machine"),
                 hidePluginSettings: createHiddenComputed("/Settings/Plugins"),
                 hideGeneralSettings: createHiddenComputed("/Settings/General"),
-                hideDashboard: createHiddenComputed("/Control/Dashboard"),
+                hideDashboard: createHiddenComputed("/"),
                 hideStatus: createHiddenComputed("/Status"),
                 hideJobStatus: createHiddenComputed("/Job/Status"),
                 hideWebcam: createHiddenComputed("/Job/Webcam"),

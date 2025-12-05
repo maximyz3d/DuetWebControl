@@ -198,13 +198,20 @@ export default Vue.extend({
 
 		// Validate navigation
 		Vue.prototype.$vuetify = this.$vuetify;
-		this.$router.beforeEach((to: Route, from: Route, next: NavigationGuardNext) => {
-			if (Routes.some(route => route.path === to.path && !(route as MenuItem).condition)) {
-				next("/");
-			} else {
-				next();
-			}
-		});
+                this.$router.beforeEach((to: Route, from: Route, next: NavigationGuardNext) => {
+                        if (Routes.some(route => route.path === to.path && !(route as MenuItem).condition)) {
+                                next("/");
+                                return;
+                        }
+
+                        if (store.state.settings.hiddenMenuItems.includes(to.path)) {
+                                const fallback = Routes.find(route => route.path !== "*" && !store.state.settings.hiddenMenuItems.includes(route.path) && (route as MenuItem).condition);
+                                next(fallback ? fallback.path : "/");
+                                return;
+                        }
+
+                        next();
+                });
 
 		// Set up Piecon
 		Piecon.setOptions({
