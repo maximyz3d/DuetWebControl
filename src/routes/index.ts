@@ -12,12 +12,12 @@ import Filaments from "./Files/Filaments.vue";
 import Jobs from "./Files/Jobs.vue";
 import Macros from "./Files/Macros.vue";
 import System from "./Files/System.vue";
+import Projects from "./Files/Projects.vue";
 
 import JobStatus from "./Job/Status.vue";
 import Webcam from "./Job/Webcam.vue";
 
 import General from "./Settings/General.vue";
-import AdminAccess from "./Settings/AdminAccess.vue";
 import Machine from "./Settings/Machine.vue";
 import Plugins from "./Settings/Plugins.vue";
 
@@ -89,23 +89,23 @@ export interface MenuCategory {
  * Actual menu structure (name vs. category descriptor)
  */
 export const Menu = Vue.observable<Record<string, MenuCategory>>({
-        Control: {
-                icon: "mdi-tune",
-                caption: "menu.control.caption",
-                pages: [
-                        {
-                                icon: "mdi-list-status",
-                                caption: "menu.control.status",
-                                condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
-                                path: "/Status",
-                                component: Status
-                        },
-                        {
-                                icon: "mdi-view-dashboard",
-                                caption: "menu.control.dashboard",
-                                path: "/",
-                                component: Dashboard
-                        },
+	Control: {
+		icon: "mdi-tune",
+		caption: "menu.control.caption",
+		pages: [
+			{
+				icon: "mdi-list-status",
+				caption: "menu.control.status",
+				condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
+				path: "/Status",
+				component: Status
+			},
+			{
+				icon: "mdi-view-dashboard",
+				caption: "menu.control.dashboard",
+				path: "/",
+				component: Dashboard
+			},
 			{
 				icon: "mdi-code-tags",
 				caption: "menu.control.console",
@@ -163,24 +163,24 @@ export const Menu = Vue.observable<Record<string, MenuCategory>>({
 				caption: "menu.files.system",
 				path: "/Files/System",
 				component: System
+			},
+			{
+				icon: "mdi-folder-multiple",
+				caption: "menu.files.projects",
+				path: "/Files/Projects",
+				component: Projects
 			}
 		],
 		translated: false
 	},
-        Settings: {
-                icon: "mdi-wrench",
-                caption: "menu.settings.caption",
-                pages: [
-                        {
-                                icon: "mdi-lock",
-                                caption: "menu.settings.adminAccess",
-                                path: "/Settings/AdminAccess",
-                                component: AdminAccess
-                        },
-                        {
-                                icon: "mdi-tune",
-                                caption: "menu.settings.general",
-                                path: "/Settings/General",
+	Settings: {
+		icon: "mdi-wrench",
+		caption: "menu.settings.caption",
+		pages: [
+			{
+				icon: "mdi-tune",
+				caption: "menu.settings.general",
+				path: "/Settings/General",
 				component: General
 			},
 			{
@@ -354,18 +354,18 @@ const router = new VueRouter({
 });
 
 for (const category in Menu) {
-        for (const page of Menu[category].pages) {
-                if (page.condition === undefined) {
-                        page.condition = true;
-                } else if (page.condition instanceof Function) {
+	for (const page of Menu[category].pages) {
+		if (page.condition === undefined) {
+			page.condition = true;
+		} else if (page.condition instanceof Function) {
 			Object.defineProperty(page, "condition", {
 				get: page.condition as (() => boolean)
 			});
 		}
 
 		router.addRoute(page);
-                Routes.push(page);
-        }
+		Routes.push(page);
+	}
 }
 
 router.addRoute(
