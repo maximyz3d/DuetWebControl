@@ -531,7 +531,8 @@
     "settings": {
       "caption": "Settings",
       "general": "General",
-      "machine": "Machine-Specific"
+      "machine": "Machine-Specific",
+      "adminAccess": "Admin Access"
     }
   },
   "notification": {
@@ -753,7 +754,23 @@
       "macroFiles": "Hide Macro Files",
       "systemFiles": "Hide System Files",
       "machineSettings": "Hide Machine Settings",
-      "pluginSettings": "Hide Plugin Settings"
+      "pluginSettings": "Hide Plugin Settings",
+      "generalSettings": "Hide General Settings",
+      "dashboard": "Hide Dashboard",
+      "status": "Hide Control Status",
+      "jobStatus": "Hide Job Status",
+      "webcam": "Hide Webcam",
+      "objectModel": "Hide Object Model Browser",
+      "inputShaping": "Hide Input Shaping"
+    },
+    "adminAccess": {
+      "title": "Administrator Login",
+      "username": "Username",
+      "password": "Password",
+      "unlock": "Unlock Admin Mode",
+      "lock": "Lock to User Mode",
+      "unlocked": "Admin access is enabled. All menu items are visible.",
+      "invalidCredentials": "Invalid credentials"
     },
     "settingsCommunication": {
       "caption": "Communication",
