@@ -20,6 +20,7 @@ import Webcam from "./Job/Webcam.vue";
 import General from "./Settings/General.vue";
 import Machine from "./Settings/Machine.vue";
 import Plugins from "./Settings/Plugins.vue";
+import AdminAccess from "./Settings/AdminAccess.vue";
 
 import Page404 from "./Page404.vue";
 
@@ -173,15 +174,22 @@ export const Menu = Vue.observable<Record<string, MenuCategory>>({
 		],
 		translated: false
 	},
-	Settings: {
-		icon: "mdi-wrench",
-		caption: "menu.settings.caption",
-		pages: [
-			{
-				icon: "mdi-tune",
-				caption: "menu.settings.general",
-				path: "/Settings/General",
-				component: General
+        Settings: {
+                icon: "mdi-wrench",
+                caption: "menu.settings.caption",
+                pages: [
+                        {
+                                icon: "mdi-lock-check",
+                                caption: "Admin Access",
+                                translated: true,
+                                path: "/Settings/AdminAccess",
+                                component: AdminAccess
+                        },
+                        {
+                                icon: "mdi-tune",
+                                caption: "menu.settings.general",
+                                path: "/Settings/General",
+                                component: General
 			},
 			{
 				icon: "mdi-cogs",

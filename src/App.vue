@@ -117,26 +117,29 @@ export default Vue.extend({
 		status(): MachineStatus { return store.state.machine.model.state.status; },
 		iconMenu(): boolean { return store.state.settings.iconMenu; },
 		jobProgress(): number { return store.getters["machine/model/jobProgress"]; },
-		injectedComponents(): Array<{ name: string, component: Component }> { return store.state.uiInjection.injectedComponents; },
-		model(): ObjectModel { return store.state.machine.model; },
+                injectedComponents(): Array<{ name: string, component: Component }> { return store.state.uiInjection.injectedComponents; },
+                hiddenMenuItems(): Array<string> { return store.getters["settings/activeHiddenMenuItems"]; },
+                model(): ObjectModel { return store.state.machine.model; },
 		categories(): Array<MenuCategory> {
 			return Object.keys(Menu)
 				.map(key => Menu[key])
-				.filter(item => item.pages.some(page => page.condition && !store.state.settings.hiddenMenuItems.includes(page.path)));
-		},
-		currentPageCondition(): boolean {
-			const currentRoute = this.$route;
-			let checkRoute = (route: MenuItem, isChild = false) => {
-				let flag = (route.path === currentRoute.path && route.condition);
-				if (!flag && isChild) {
-					let curPath = currentRoute.path.replace(/\/$/, "");
-					if (curPath.endsWith(route.path))
-						flag = (curPath.substring(0, curPath.length - route.path.length) + route.path === curPath && route.condition)
-				}
-				return flag;
-			};
-			return Routes.some(route => checkRoute(route as MenuItem));
-		},
+                                .filter(item => item.pages.some(page => this.isPageVisible(page)));
+                },
+                currentPageCondition(): boolean {
+                        const currentRoute = this.$route;
+                        let checkRoute = (route: MenuItem, isChild = false) => {
+                                const condition = route.condition instanceof Function ? route.condition : route.condition;
+                                const isVisible = !!condition && !this.hiddenMenuItems.includes(route.path);
+                                let flag = (route.path === currentRoute.path && isVisible);
+                                if (!flag && isChild) {
+                                        let curPath = currentRoute.path.replace(/\/$/, "");
+                                        if (curPath.endsWith(route.path))
+                                                flag = (curPath.substring(0, curPath.length - route.path.length) + route.path === curPath && isVisible)
+                                }
+                                return flag;
+                        };
+                        return Routes.some(route => checkRoute(route as MenuItem));
+                },
 		darkTheme(): boolean { return store.state.settings.darkTheme; },
 		isFFForUnset(): boolean {
 			if (store.state.settings.dashboardMode === DashboardMode.default) {
@@ -161,20 +164,41 @@ export default Vue.extend({
 			showConnectButton: process.env.NODE_ENV === "development"
 		};
 	},
-	methods: {
-		isExpanded(category: MenuCategory): boolean {
-			if (this.$vuetify.breakpoint.smAndDown) {
-				const route = this.$route;
-				return category.pages.some(page => page.path === route.path);
-			}
-			return true;
-		},
-		getPages(category: MenuCategory): Array<MenuItem> {
-			return category.pages.filter(page => page.condition && !store.state.settings.hiddenMenuItems.includes(page.path));
-		},
-		updateTitle(): void {
-			if (this.status === MachineStatus.disconnected) {
-				document.title = `(${this.name})`;
+        methods: {
+                isPageVisible(page: MenuItem): boolean {
+                        const condition = page.condition instanceof Function ? page.condition : page.condition;
+                        if (page.path === "/Files/Projects") {
+                                return !!condition;
+                        }
+
+                        return !!condition && !this.hiddenMenuItems.includes(page.path);
+                },
+                isExpanded(category: MenuCategory): boolean {
+                        if (this.$vuetify.breakpoint.smAndDown) {
+                                const route = this.$route;
+                                return category.pages.some(page => page.path === route.path);
+                        }
+                        return true;
+                },
+                isPathVisible(path: string): boolean {
+                        const route = Routes.find(item => item.path === path) as MenuItem | undefined;
+                        return route ? this.isPageVisible(route) : false;
+                },
+                getPages(category: MenuCategory): Array<MenuItem> {
+                        return category.pages.filter(page => this.isPageVisible(page));
+                },
+                getFirstVisiblePath(): string {
+                        const preferredPath = "/Files/Projects";
+                        if (this.isPathVisible(preferredPath)) {
+                                return preferredPath;
+                        }
+
+                        const firstVisibleRoute = Routes.find(route => this.isPageVisible(route as MenuItem));
+                        return firstVisibleRoute ? (firstVisibleRoute as MenuItem).path : preferredPath;
+                },
+                updateTitle(): void {
+                        if (this.status === MachineStatus.disconnected) {
+                                document.title = `(${this.name})`;
 			} else {
 				const jobProgress = this.jobProgress;
 				const title = ((jobProgress > 0 && isPrinting(this.status)) ? `(${(jobProgress * 100).toFixed(1)}%) ` : '') + this.name;
@@ -196,15 +220,17 @@ export default Vue.extend({
 		// Attempt to load the settings
 		store.dispatch("settings/load");
 
-		// Validate navigation
-		Vue.prototype.$vuetify = this.$vuetify;
-		this.$router.beforeEach((to: Route, from: Route, next: NavigationGuardNext) => {
-			if (Routes.some(route => route.path === to.path && !(route as MenuItem).condition)) {
-				next("/");
-			} else {
-				next();
-			}
-		});
+                // Validate navigation
+                Vue.prototype.$vuetify = this.$vuetify;
+                this.$router.beforeEach((to: Route, from: Route, next: NavigationGuardNext) => {
+                        const targetRoute = Routes.find(route => route.path === to.path) as MenuItem | undefined;
+                        const targetVisible = targetRoute ? this.isPageVisible(targetRoute) : true;
+                        if (targetRoute && !targetVisible) {
+                                next(this.getFirstVisiblePath());
+                        } else {
+                                next();
+                        }
+                });
 
 		// Set up Piecon
 		Piecon.setOptions({
@@ -213,17 +239,17 @@ export default Vue.extend({
 			shadow: "#fff",			// Outer ring color
 			fallback: false			// Toggles displaying percentage in the title bar (possible values - true, false, 'force')
 		});
-	},
-	watch: {
-		currentPageCondition(to: boolean) {
-			if (!to) {
-				this.$router.push("/");
-			}
-		},
-		darkTheme(to: boolean) {
-			this.$vuetify.theme.dark = to;
-		},
-		isConnecting(to: boolean) {
+        },
+        watch: {
+                currentPageCondition(to: boolean) {
+                        if (!to) {
+                                this.$router.push(this.getFirstVisiblePath());
+                        }
+                },
+                darkTheme(to: boolean) {
+                        this.$vuetify.theme.dark = to;
+                },
+                isConnecting(to: boolean) {
 			if (!to && store.state.machine.model.volumes.length > 0) {
 				const firstVolume = store.state.machine.model.volumes[0];
 				if (firstVolume.capacity !== null && firstVolume.freeSpace !== null &&
