@@ -7,6 +7,7 @@ import JobFileList from "./JobFileList.vue";
 import MacroFileList from "./MacroFileList.vue";
 import MacroList from "./MacroList.vue";
 import SystemFileList from "./SystemFileList.vue";
+import ProjectsFileList from "./ProjectsFileList.vue";
 
 Vue.component("base-file-list", BaseFileList);
 Vue.component("event-list", EventList);
@@ -15,3 +16,4 @@ Vue.component("job-file-list", JobFileList);
 Vue.component("macro-file-list", MacroFileList);
 Vue.component("macro-list", MacroList);
 Vue.component("system-file-list", SystemFileList);
+Vue.component("projects-file-list", ProjectsFileList);
