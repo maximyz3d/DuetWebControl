@@ -127,6 +127,10 @@
       "update": {
         "caption": "Install Update",
         "title": "Upload and install an update (drag&drop is supported as well)"
+      },
+      "projects": {
+      "caption": "Upload File(s)",
+      "title": "Upload one or more project files (drag&drop is supported as well)"
       }
     }
   },
@@ -334,6 +338,7 @@
     "gcodes": "G-Codes Directory",
     "macros": "Macros Directory",
     "system": "System Directory",
+    "projects": "Projects Directory",
     "web": "WWW Directory"
   },
   "error": {
@@ -517,6 +522,7 @@
       "macros": "Macros",
       "menu": "Display",
       "system": "System",
+      "projects": "Projects",
       "web": "Web"
     },
     "plugins": {
@@ -525,8 +531,7 @@
     "settings": {
       "caption": "Settings",
       "general": "General",
-      "machine": "Machine-Specific",
-      "adminAccess": "Admin Access"
+      "machine": "Machine-Specific"
     }
   },
   "notification": {
@@ -748,23 +753,7 @@
       "macroFiles": "Hide Macro Files",
       "systemFiles": "Hide System Files",
       "machineSettings": "Hide Machine Settings",
-      "pluginSettings": "Hide Plugin Settings",
-      "generalSettings": "Hide General Settings",
-      "dashboard": "Hide Dashboard",
-      "status": "Hide Control Status",
-      "jobStatus": "Hide Job Status",
-      "webcam": "Hide Webcam",
-      "objectModel": "Hide Object Model Browser",
-      "inputShaping": "Hide Input Shaping"
-    },
-    "adminAccess": {
-      "title": "Administrator Login",
-      "username": "Username",
-      "password": "Password",
-      "unlock": "Unlock Admin Mode",
-      "lock": "Lock to User Mode",
-      "unlocked": "Admin access is enabled. All menu items are visible.",
-      "invalidCredentials": "Invalid credentials"
+      "pluginSettings": "Hide Plugin Settings"
     },
     "settingsCommunication": {
       "caption": "Communication",
@@ -987,106 +976,106 @@
       "menuCaption": "Update"
     },
     "gcodeViewer": {
-      "caption": "G-Code Viewer",
-      "view3D": "View 3D",
-      "fullscreen": "Full Screen",
-      "showConfiguration": "Show Viewer Configuration",
-      "reset": {
-        "caption": "Reset Camera",
-        "title": "Reset camera to home position"
-      },
-      "camera": {
-      "title": "Camera View",
-      "caption": "Camera View"
-      },
-      "orbitObject": {
-      "title": "Orbit Object",
-      "caption": "Orbit Object"
-      },
-      "cancelLoad": "Cancel File Loading",
-      "reloadView": {
-        "caption": "Reload View",
-        "title": "Reload the current gcode, this is used when changing settings like color, feedrate color, etc."
-      },
-      "loadCurrentJob": {
-        "caption": "Load Current Job",
-        "title": "Load the current printing or simulating job"
-      },
-      "unloadGCode": {
-        "caption": "Unload GCode",
-        "title": "Remove the loaded gcode from the viewer"
-      },
-      "loadLocalGCode": {
-        "caption": "Load Local GCode",
-        "title": "Load a file from your local drive into the viewer"
-      },
-      "showCursor": "Show Cursor",
-      "showTravels": "Show Travels",
-      "renderQuality": {
-        "caption": "Render Quality",
-        "title": "Adjust the visualization quality of the viewer. The higher the level the more vertices and render modes become available"
-      },
-      "sbc": "SBC",
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "ultra": "Ultra",
-      "max": "Max",
-      "forceLineRendering": "Force Line Rendering",
-      "transparency": "Transparency",
-      "showSolid": "Show Solid",
-      "spreadLines": "Spread Lines",
-      "extruders": {
-        "caption": "Extruders",
-        "title": "Sets the color used for rendering an extruder"
-      },
-      "tool": "Tool {0}",
-      "resetColor": "Reset Tool Color | Reset Tool Colors",
-      "renderMode": {
-        "caption": "Render Mode | Render Modes",
-        "title": "Render mode allows you to set extruder color or feedrate line coloring in the viewer"
-      },
-      "color": "Color",
-      "feedrate": "Feedrate",
-      "minFeedrate": "Minimum Feedrate (mm/s)",
-      "maxFeedrate": "Maximum Feedrate (mm/s)",
-      "minFeedrateColor": "Minimum Feedrate Color",
-      "maxFeedrateColor": "Maximum Feedrate Color",
-      "progress": {
-        "caption": "Progress",
-        "title": "Set the printed color for progress tracking"
-      },
-      "topClipping": "Top Clipping",
-      "bottomClipping": "Bottom Clipping",
-      "progressColor": "Progress Color",
-      "liveZTracking": "Live Z Tracking",
-      "settings": "Settings",
-      "background": "Background",
-      "bedRenderMode": "Bed Render Mode",
-      "bed": "Bed",
-      "volume": "Volume",
-      "showAxes": "Show Axes",
-      "showObjectLabels": "Show Object Labels",
-      "cameraInertia": "Camera Inertia",
-      "showObjectSelection": {
-        "caption": "Show Object Selection",
-        "title": "Enabled if objects could be detected in the current print"
-      },
-      "renderFailed": "Previous render failed. Setting render quality to SBC",
-      "showFSOverlay": "Show Full Screen Overlay",
-      "useHQRendering": "High Quality Render (Round)",
-      "useSpecular": "Use Specular Highlight",
-      "feature": "Feature",
-      "g1AsExtrusion": "Render G1 (CNC)",
-      "viewGCode": "View G-Code",
-      "zBelt": "Z Belt",
-      "zBeltAngle": "Z Belt Gantry Angle",
-      "showWorkplace": "Show Workplace",
-      "perimeterOnly": "Perimeter Only",
-      "progressMode": "Progress Mode",
-      "cancelObj": "Cancel Object",
-      "resumeObj": "Resume Object",
-      "persistTravels": "Persist Travels"
+        "caption": "G-Code Viewer",
+        "view3D": "View 3D",
+        "fullscreen": "Full Screen",
+        "showConfiguration": "Show Viewer Configuration",
+        "camera": {
+            "title": "Camera View",
+            "caption": "Camera View"
+        },
+        "orbitObject": {
+            "title": "Orbit Object",
+            "caption": "Orbit Object"
+        },
+        "resetCamera": {
+            "caption": "Reset Camera",
+            "title": "Reset camera to home position"
+        },
+        "cancelLoad": "Cancel File Loading",
+        "reloadView": {
+            "caption": "Reload View",
+            "title": "Reload the current gcode, this is used when changing settings like color, feedrate color, etc."
+        },
+        "loadCurrentJob": {
+            "caption": "Load Current Job",
+            "title": "Load the current printing or simulating job"
+        },
+        "unloadGCode": {
+            "caption": "Unload GCode",
+            "title": "Remove the loaded gcode from the viewer"
+        },
+        "loadLocalGCode": {
+            "caption": "Load Local GCode",
+            "title": "Load a file from your local drive into the viewer"
+        },
+        "showCursor": "Show Cursor",
+        "showTravels": "Show Travels",
+        "renderQuality": {
+            "caption": "Render Quality",
+            "title": "Adjust the visualization quality of the viewer. The higher the level the more vertices and render modes become available"
+        },
+        "sbc": "SBC",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "ultra": "Ultra",
+        "max": "Max",
+        "forceLineRendering": "Force Line Rendering",
+        "transparency": "Transparency",
+        "showSolid": "Show Solid",
+        "spreadLines": "Spread Lines",
+        "extruders": {
+            "caption": "Extruders",
+            "title": "Sets the color used for rendering an extruder"
+        },
+        "tool": "Tool {0}",
+        "resetColor": "Reset Tool Color | Reset Tool Colors",
+        "renderMode": {
+            "caption": "Render Mode | Render Modes",
+            "title": "Render mode allows you to set extruder color or feedrate line coloring in the viewer"
+        },
+        "color": "Color",
+        "feedrate": "Feedrate",
+        "minFeedrate": "Minimum Feedrate (mm/s)",
+        "maxFeedrate": "Maximum Feedrate (mm/s)",
+        "minFeedrateColor": "Minimum Feedrate Color",
+        "maxFeedrateColor": "Maximum Feedrate Color",
+        "progress": {
+            "caption": "Progress",
+            "title": "Set the printed color for progress tracking"
+        },
+        "topClipping": "Top Clipping",
+        "bottomClipping": "Bottom Clipping",
+        "progressColor": "Progress Color",
+        "liveZTracking": "Live Z Tracking",
+        "settings": "Settings",
+        "background": "Background",
+        "bedRenderMode": "Bed Render Mode",
+        "bed": "Bed",
+        "volume": "Volume",
+        "showAxes": "Show Axes",
+        "showObjectLabels": "Show Object Labels",
+        "cameraInertia": "Camera Inertia",
+        "showObjectSelection": {
+            "caption": "Show Object Selection",
+            "title": "Enabled if objects could be detected in the current print"
+        },
+        "renderFailed": "Previous render failed. Setting render quality to SBC",
+        "showFSOverlay": "Show Full Screen Overlay",
+        "useHQRendering": "High Quality Render (Round)",
+        "useSpecular": "Use Specular Highlight",
+        "feature": "Feature",
+        "g1AsExtrusion": "Render G1 (CNC)",
+        "viewGCode": "View G-Code",
+        "zBelt": "Z Belt",
+        "zBeltAngle": "Z Belt Gantry Angle",
+        "showWorkplace": "Show Workplace",
+        "perimeterOnly": "Perimeter Only",
+        "progressMode": "Progress Mode",
+        "cancelObj": "Cancel Object",
+        "resumeObj": "Resume Object",
+        "persistTravels": "Persist Travels"
     },
     "heightmap": {
       "menuCaption": "Height Map",
