@@ -12,6 +12,7 @@ import Filaments from "./Files/Filaments.vue";
 import Jobs from "./Files/Jobs.vue";
 import Macros from "./Files/Macros.vue";
 import System from "./Files/System.vue";
+import Projects from "./Files/Projects.vue";
 
 import JobStatus from "./Job/Status.vue";
 import Webcam from "./Job/Webcam.vue";
@@ -162,6 +163,12 @@ export const Menu = Vue.observable<Record<string, MenuCategory>>({
 				caption: "menu.files.system",
 				path: "/Files/System",
 				component: System
+			},
+			{
+				icon: "mdi-folder-multiple",
+				caption: "menu.files.projects",
+				path: "/Files/Projects",
+				component: Projects
 			}
 		],
 		translated: false
