@@ -4,7 +4,6 @@ import VueRouter, { RouteConfig } from "vue-router";
 
 import store from "@/store";
 
-import BtnCmd from "./Control/BtnCmd.vue";
 import Status from "./Control/Status.vue";
 import Dashboard from "./Control/Dashboard.vue";
 import Console from "./Control/Console.vue";
@@ -95,22 +94,16 @@ export const Menu = Vue.observable<Record<string, MenuCategory>>({
                 caption: "menu.control.caption",
                 pages: [
                         {
-                                icon: "mdi-gesture-tap-button",
-                                caption: "menu.control.btnCmd",
-                                path: "/BtnCmd",
-                                component: BtnCmd
-                        },
-                        {
                                 icon: "mdi-list-status",
                                 caption: "menu.control.status",
                                 condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
                                 path: "/Status",
-				component: Status
-			},
+                                component: Status
+                        },
                         {
                                 icon: "mdi-view-dashboard",
                                 caption: "menu.control.dashboard",
-                                path: "/Control/Dashboard",
+                                path: "/",
                                 component: Dashboard
                         },
 			{
@@ -374,11 +367,6 @@ for (const category in Menu) {
                 Routes.push(page);
         }
 }
-
-router.addRoute({
-        path: "/",
-        redirect: "/BtnCmd"
-});
 
 router.addRoute(
     {

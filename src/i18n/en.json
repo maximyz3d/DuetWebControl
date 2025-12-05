@@ -501,7 +501,6 @@
   "menu": {
     "control": {
       "caption": "Control",
-      "btnCmd": "Button Commands",
       "status": "Status",
       "dashboard": "Dashboard",
       "console": "Console"
@@ -766,13 +765,6 @@
       "lock": "Lock to User Mode",
       "unlocked": "Admin access is enabled. All menu items are visible.",
       "invalidCredentials": "Invalid credentials"
-    },
-    "btnCmd": {
-      "caption": "Button Commands",
-      "description": "Quickly access the most common actions from this limited user view.",
-      "openMacros": "Open Macros",
-      "openConsole": "Open Console",
-      "viewStatus": "View Status"
     },
     "settingsCommunication": {
       "caption": "Communication",

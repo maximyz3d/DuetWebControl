@@ -78,7 +78,7 @@ export default Vue.extend({
                         this.username = "";
                         this.password = "";
                         this.error = "";
-                        this.$router.push("/BtnCmd");
+                        this.$router.push("/");
                 }
         }
 });
