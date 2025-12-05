@@ -501,6 +501,7 @@
   "menu": {
     "control": {
       "caption": "Control",
+      "btnCmd": "Button Commands",
       "status": "Status",
       "dashboard": "Dashboard",
       "console": "Console"
@@ -525,7 +526,8 @@
     "settings": {
       "caption": "Settings",
       "general": "General",
-      "machine": "Machine-Specific"
+      "machine": "Machine-Specific",
+      "adminAccess": "Admin Access"
     }
   },
   "notification": {
@@ -747,7 +749,30 @@
       "macroFiles": "Hide Macro Files",
       "systemFiles": "Hide System Files",
       "machineSettings": "Hide Machine Settings",
-      "pluginSettings": "Hide Plugin Settings"
+      "pluginSettings": "Hide Plugin Settings",
+      "generalSettings": "Hide General Settings",
+      "dashboard": "Hide Dashboard",
+      "status": "Hide Control Status",
+      "jobStatus": "Hide Job Status",
+      "webcam": "Hide Webcam",
+      "objectModel": "Hide Object Model Browser",
+      "inputShaping": "Hide Input Shaping"
+    },
+    "adminAccess": {
+      "title": "Administrator Login",
+      "username": "Username",
+      "password": "Password",
+      "unlock": "Unlock Admin Mode",
+      "lock": "Lock to User Mode",
+      "unlocked": "Admin access is enabled. All menu items are visible.",
+      "invalidCredentials": "Invalid credentials"
+    },
+    "btnCmd": {
+      "caption": "Button Commands",
+      "description": "Quickly access the most common actions from this limited user view.",
+      "openMacros": "Open Macros",
+      "openConsole": "Open Console",
+      "viewStatus": "View Status"
     },
     "settingsCommunication": {
       "caption": "Communication",

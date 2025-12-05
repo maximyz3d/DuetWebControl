@@ -4,6 +4,7 @@ import VueRouter, { RouteConfig } from "vue-router";
 
 import store from "@/store";
 
+import BtnCmd from "./Control/BtnCmd.vue";
 import Status from "./Control/Status.vue";
 import Dashboard from "./Control/Dashboard.vue";
 import Console from "./Control/Console.vue";
@@ -17,6 +18,7 @@ import JobStatus from "./Job/Status.vue";
 import Webcam from "./Job/Webcam.vue";
 
 import General from "./Settings/General.vue";
+import AdminAccess from "./Settings/AdminAccess.vue";
 import Machine from "./Settings/Machine.vue";
 import Plugins from "./Settings/Plugins.vue";
 
@@ -88,23 +90,29 @@ export interface MenuCategory {
  * Actual menu structure (name vs. category descriptor)
  */
 export const Menu = Vue.observable<Record<string, MenuCategory>>({
-	Control: {
-		icon: "mdi-tune",
-		caption: "menu.control.caption",
-		pages: [
-			{
-				icon: "mdi-list-status",
-				caption: "menu.control.status",
-				condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
-				path: "/Status",
+        Control: {
+                icon: "mdi-tune",
+                caption: "menu.control.caption",
+                pages: [
+                        {
+                                icon: "mdi-gesture-tap-button",
+                                caption: "menu.control.btnCmd",
+                                path: "/BtnCmd",
+                                component: BtnCmd
+                        },
+                        {
+                                icon: "mdi-list-status",
+                                caption: "menu.control.status",
+                                condition: () => Vue.prototype.$vuetify && Vue.prototype.$vuetify.breakpoint.smAndDown,
+                                path: "/Status",
 				component: Status
 			},
-			{
-				icon: "mdi-view-dashboard",
-				caption: "menu.control.dashboard",
-				path: "/",
-				component: Dashboard
-			},
+                        {
+                                icon: "mdi-view-dashboard",
+                                caption: "menu.control.dashboard",
+                                path: "/Control/Dashboard",
+                                component: Dashboard
+                        },
 			{
 				icon: "mdi-code-tags",
 				caption: "menu.control.console",
@@ -166,14 +174,20 @@ export const Menu = Vue.observable<Record<string, MenuCategory>>({
 		],
 		translated: false
 	},
-	Settings: {
-		icon: "mdi-wrench",
-		caption: "menu.settings.caption",
-		pages: [
-			{
-				icon: "mdi-tune",
-				caption: "menu.settings.general",
-				path: "/Settings/General",
+        Settings: {
+                icon: "mdi-wrench",
+                caption: "menu.settings.caption",
+                pages: [
+                        {
+                                icon: "mdi-lock",
+                                caption: "menu.settings.adminAccess",
+                                path: "/Settings/AdminAccess",
+                                component: AdminAccess
+                        },
+                        {
+                                icon: "mdi-tune",
+                                caption: "menu.settings.general",
+                                path: "/Settings/General",
 				component: General
 			},
 			{
@@ -347,19 +361,24 @@ const router = new VueRouter({
 });
 
 for (const category in Menu) {
-	for (const page of Menu[category].pages) {
-		if (page.condition === undefined) {
-			page.condition = true;
-		} else if (page.condition instanceof Function) {
+        for (const page of Menu[category].pages) {
+                if (page.condition === undefined) {
+                        page.condition = true;
+                } else if (page.condition instanceof Function) {
 			Object.defineProperty(page, "condition", {
 				get: page.condition as (() => boolean)
 			});
 		}
 
 		router.addRoute(page);
-		Routes.push(page);
-	}
+                Routes.push(page);
+        }
 }
+
+router.addRoute({
+        path: "/",
+        redirect: "/BtnCmd"
+});
 
 router.addRoute(
     {
