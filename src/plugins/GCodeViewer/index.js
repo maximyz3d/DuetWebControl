@@ -33,6 +33,10 @@ router.addRoute({
 	component: GCodeViewer,
 });
 
+if (router.currentRoute.path === '/Plugins/GCodeViewer/embed') {
+	router.replace(router.currentRoute.fullPath).catch(() => {});
+}
+
 registerPluginContextMenuItem(() => i18n.t('plugins.gcodeViewer.view3D'), '/Plugins/GCodeViewer', 'mdi-rotate-3d', 'view-3d-model', ContextMenuType.JobFileList);
 registerPluginData('GCodeViewer', PluginDataType.machineCache, 'toolColors', ['#00FFFF', '#FF00FF', '#FFFF00', '#000000', '#FFFFFF']);
 registerPluginData('GCodeViewer', PluginDataType.machineCache, 'useHQRendering', false);
