@@ -148,7 +148,12 @@ export default Vue.extend({
 			return this.$vuetify.breakpoint.mobile && !this.$vuetify.breakpoint.xsOnly && store.state.settings.bottomNavigation;
 		},
 		isEmbeddedGCodeOnly(): boolean {
-			return this.$route.path === "/Plugins/GCodeViewer" && this.$route.query.embed === "gcode";
+				if (this.$route.path !== "/Plugins/GCodeViewer") {
+					return false;
+				}
+
+				const embedMode = String(this.$route.query.embed || "").toLowerCase();
+				return ["viewer", "gcode", "gcodeviewer", "true", "1"].includes(embedMode);
 		},
 		doNotSwitchToStatusPanelOnJobStart(): boolean {
 			return store.state.settings.behaviour.jobStart; 
@@ -248,7 +253,7 @@ export default Vue.extend({
 					// Go to Job Status when a print starts
 					if (this.$router.currentRoute.path !== "/Job/Status" && !this.doNotSwitchToStatusPanelOnJobStart) {
 						this.$router.push("/Job/Status");
-					}
+				}
 				} else {
 					// Remove the Piecon again when the print has finished
 					Piecon.reset();
