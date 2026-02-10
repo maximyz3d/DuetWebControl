@@ -793,11 +793,11 @@ export default {
 			sendCode: 'sendCode',
 		}),
 
-		hasLoadedGCode(): boolean {
+		hasLoadedGCode() {
 			return Boolean(viewer && viewer.gcodeProcessor && viewer.fileData && viewer.fileData.length > 0);
 		},
 
-		updateFilePositionSafe(position: number): void {
+		updateFilePositionSafe(position) {
 			if (!this.hasLoadedGCode() || typeof position !== 'number' || Number.isNaN(position)) {
 				return;
 			}
