@@ -793,6 +793,17 @@ export default {
 			sendCode: 'sendCode',
 		}),
 
+		hasLoadedGCode(): boolean {
+			return Boolean(viewer && viewer.gcodeProcessor && viewer.fileData && viewer.fileData.length > 0);
+		},
+
+		updateFilePositionSafe(position: number): void {
+			if (!this.hasLoadedGCode() || typeof position !== 'number' || Number.isNaN(position)) {
+				return;
+			}
+			viewer.gcodeProcessor.updateFilePosition(position);
+		},
+
 		simulatePlay() {
 			if (this.scrubPlaying) {
 				viewer.stopSimulation();
@@ -808,8 +819,10 @@ export default {
 
 			this.$nextTick(() => {
 				this.scrubPosition = value;
-				viewer.gcodeProcessor.updateFilePosition(value);
-				viewer.simulateToolPosition();
+				this.updateFilePositionSafe(value);
+				if (this.hasLoadedGCode()) {
+					viewer.simulateToolPosition();
+				}
 				viewer.simulation = viewerState;
 			});
 		},
@@ -911,7 +924,7 @@ export default {
 				this.setGCodeValues();
 				viewer.buildObjects.loadObjectBoundaries(this.job.build.objects); //file is loaded lets load the final heights
 			} finally {
-				viewer.gcodeProcessor.updateFilePosition(0);
+				this.updateFilePositionSafe(0);
 				viewer.gcodeProcessor.forceRedraw();
 				this.loading = false;
 			}
@@ -938,7 +951,7 @@ export default {
 			this.setGCodeValues();
 			
 			viewer.gcodeProcessor.forceRedraw();
-			viewer.gcodeProcessor.updateFilePosition(this.scrubPosition);
+			this.updateFilePositionSafe(this.scrubPosition);
 
 			try {
 				viewer.buildObjects.loadObjectBoundaries(this.job.build.objects);
@@ -1046,7 +1059,7 @@ export default {
 			viewer.stopSimulation();
 			this.scrubPlaying = false;
 			this.scrubPosition = this.scrubFileSize;
-			viewer.gcodeProcessor.updateFilePosition(this.scrubFileSize);
+			this.updateFilePositionSafe(this.scrubFileSize);
 			
 		},
 		updatePosition(){
@@ -1140,7 +1153,7 @@ export default {
 		'filePosition': function (newValue) {
 			if (this.visualizingCurrentJob) {
 				this.scrubPosition = newValue;
-				viewer.gcodeProcessor.updateFilePosition(newValue + 1);
+				this.updateFilePositionSafe(newValue + 1);
 			}
 		},
 		scrubSpeed(to) {
@@ -1199,7 +1212,7 @@ export default {
 		},
 		'selectedFile': function () {
 			this.showObjectSelection = false;
-			viewer.gcodeProcessor.updateFilePosition(0);
+			this.updateFilePositionSafe(0);
 		},
 		'bedRenderMode': function (newValue) {
 			viewer.bed.setRenderMode(newValue);
