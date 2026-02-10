@@ -170,7 +170,7 @@
 </style>
 
 <template>
-	<div class="primary-container mt-2" ref="primarycontainer" v-resize="resize">
+	<div :class="['primary-container', { 'mt-2': !isEmbedMode }]" ref="primarycontainer" v-resize="resize">
 		<div :class="{ 'full-screen': fullscreen }" class="viewer-box">
 			<div :class="emergencyButtonClass" v-show="fullscreen">
 				<code-btn :code="'M112\nM999'" :log="false" :title="$t('button.emergencyStop.title')" color="error">
@@ -183,24 +183,28 @@
 			<div class="loading-progress">
 				<v-progress-linear :value="loadingProgress" class="disable-transition" height="15" rounded v-show="loading">{{loadingProgress}}% {{loadingMessage}}</v-progress-linear>
 			</div>
-			<div :class="{ 'button-container-drawer': drawer }" class="button-container">
+			<div :class="{ 'button-container-drawer': drawer && !isEmbedMode }" class="button-container">
 				<v-btn :title="$t('plugins.gcodeViewer.fullscreen')" @click="toggleFullScreen" class="full-screen-icon mb-2" color="secondary" small>
 					<v-icon>{{ fullscreen ? 'mdi-window-restore' : 'mdi-window-maximize' }}</v-icon>
 				</v-btn>
 				<br />
-				<v-btn :title="$t('plugins.gcodeViewer.showConfiguration')" @click="drawer = !drawer" class="toggle-menu-button-close mb-10" color="secondary" small>
+				<v-btn v-if="!isEmbedMode" :title="$t('plugins.gcodeViewer.showConfiguration')" @click="drawer = !drawer" class="toggle-menu-button-close mb-10" color="secondary" small>
 					<v-icon>mdi-cog</v-icon>
 				</v-btn>
 				<br />
 				<v-btn :title="$t('plugins.gcodeViewer.loadCurrentJob.title')" @click="loadRunningJob" class="toggle-menu-button-close mb-10" color="secondary" small v-show="!(!isJobRunning || loading || visualizingCurrentJob)">
 					<v-icon>mdi-printer-3d</v-icon>
 				</v-btn>
+				<br v-if="!isEmbedMode" />
+				<v-btn v-if="isEmbedMode" :title="$t('plugins.gcodeViewer.loadLocalGCode.title')" @click="chooseFile" class="toggle-menu-button-close mb-10" color="secondary" small>
+					<v-icon>mdi-file</v-icon>
+				</v-btn>
 				<br />
 				<v-btn :title="$t('plugins.gcodeViewer.cancelLoad')" @click="cancelLoad" class="toggle-menu-button-close" color="warning" small v-show="loading">
 					<v-icon color="red">mdi-cancel</v-icon>
 				</v-btn>
 			</div>
-			<v-navigation-drawer :permanent="drawer" absolute v-model="drawer" width="350px">
+			<v-navigation-drawer v-if="!isEmbedMode" :permanent="drawer" absolute v-model="drawer" width="350px">
 				<v-card>
 					<v-btn :title="$t('plugins.gcodeViewer.resetCamera.title')" @click="reset" block color="primary">
 						<v-icon class="mr-2">mdi-camera</v-icon>
@@ -222,7 +226,6 @@
 						<v-icon>mdi-file</v-icon>
 						{{ $t('plugins.gcodeViewer.loadLocalGCode.caption') }}
 					</v-btn>
-					<input :accept="'.g,.gcode,.gc,.gco,.nc,.ngc,.tap'" @change="fileSelected" hidden multiple ref="fileInput" type="file" />
 					<v-switch :disabled="!canCancelObject" :label="jobSelectionLabel" :title="$t('plugins.gcodeViewer.showObjectSelection.title')" class="mt-4" v-model="showObjectSelection"></v-switch>
 					<v-switch :label="$t('plugins.gcodeViewer.showCursor')" v-model="showCursor"></v-switch>
 					<v-switch :label="$t('plugins.gcodeViewer.showTravels')" v-model="showTravelLines"></v-switch>
@@ -384,6 +387,7 @@
 					</v-expansion-panel>
 				</v-expansion-panels>
 			</v-navigation-drawer>
+			<input :accept="'.g,.gcode,.gc,.gco,.nc,.ngc,.tap'" @change="fileSelected" hidden multiple ref="fileInput" type="file" />
 			<div :class="[{ 'button-container-drawer': drawer }, scrubberClass]" v-show="!visualizingCurrentJob && scrubFileSize > 0">
 				<v-row class="scrubber-row">
 					<v-col cols="10" md="6">
@@ -515,17 +519,22 @@ export default {
 		...mapState('machine/cache', {
 			pluginCache: (state) => state.plugins.GCodeViewer,
 		}),
-		isJobRunning: (state) => isPrinting(state.state.status),
-		visualizingCurrentJob: function (state) {
-			try {
-				return state.job.file.fileName === this.selectedFile && this.isJobRunning;
-			} catch {
-				return false;
-			}
+		isEmbedMode() {
+			const embedParam = this.$route?.query?.embed;
+			return this.$route?.path?.endsWith('/embed') || embedParam === '1' || embedParam === 'true';
 		},
-		filePosition: (state) => state.job.filePosition,
-		fileSize: (state) => state.job.file.size,
-		kinematicsName: (state) => state.move.kinematics.name,
+		isJobRunning() {
+			return isPrinting(this.state?.status);
+		},
+		currentJobFileName() {
+			return this.job?.file?.fileName ?? '';
+		},
+		visualizingCurrentJob() {
+			return this.isJobRunning && !!this.currentJobFileName && this.currentJobFileName === this.selectedFile;
+		},
+		filePosition() { return this.job?.filePosition ?? 0; },
+		fileSize() { return this.job?.file?.size ?? 0; },
+		kinematicsName() { return this.move?.kinematics?.name; },
 		isDelta() {
 			return this.kinematicsName === KinematicsName.delta || this.kinematicsName === KinematicsName.rotaryDelta;
 		},
@@ -541,7 +550,7 @@ export default {
 		},
 		jobSelectionLabel() {
 			var selectionLabel = this.$t('plugins.gcodeViewer.showObjectSelection.caption');
-			if (this.canCancelObject && this.job.build.objects) {
+			if (this.canCancelObject && this.job?.build?.objects) {
 				selectionLabel += ' (' + this.job.build.objects.length + ')';
 			}
 			return selectionLabel;
@@ -663,6 +672,11 @@ export default {
 		viewer.fileData = "";
 		await viewer.init();
 
+		if (this.isEmbedMode) {
+			this.drawer = false;
+			this.viewGCode = true;
+		}
+
 		// NEW: initialize camera behavior based on switches
 		if (typeof viewer.setTopFollow === 'function') {
 			viewer.setTopFollow(this.followTool);
@@ -764,6 +778,9 @@ export default {
 		this.$nextTick(() => {
 			this.updateTools();
 			this.updateWorkplaces();
+			if (this.isEmbedMode && this.isJobRunning && this.currentJobFileName) {
+				this.loadRunningJob();
+			}
 		});
 
 		window.addEventListener('keyup', (e) => {
@@ -854,12 +871,15 @@ export default {
 				clearTimeout(this.resizeDebounce);
 			}
 			this.resizeDebounce = setTimeout(() => {
-				let contentArea = getComputedStyle(document.getElementsByClassName('v-toolbar__content')[0]);
-				let globalContainer =  getComputedStyle(document.getElementById('global-container'));
-				let primaryContainer = getComputedStyle(this.$refs.primarycontainer);
-				let contentAreaHeight = parseInt(contentArea.height) + parseInt(contentArea.paddingTop) + parseInt(contentArea.paddingBottom);
-				let globalContainerHeight = this.$vuetify.breakpoint.smAndDown ? 0 : parseInt(globalContainer.height) + parseInt(globalContainer.paddingTop) + parseInt(globalContainer.paddingBottom);
-				let viewerHeight = window.innerHeight - contentAreaHeight - globalContainerHeight - parseInt(primaryContainer.marginTop);
+				const toolbarContent = document.getElementsByClassName('v-toolbar__content')[0];
+				const globalContainerElement = document.getElementById('global-container');
+				const primaryContainer = getComputedStyle(this.$refs.primarycontainer);
+				const contentArea = toolbarContent ? getComputedStyle(toolbarContent) : null;
+				const globalContainer = globalContainerElement ? getComputedStyle(globalContainerElement) : null;
+				const contentAreaHeight = this.isEmbedMode || !contentArea ? 0 : parseInt(contentArea.height) + parseInt(contentArea.paddingTop) + parseInt(contentArea.paddingBottom);
+				const globalContainerHeight = this.isEmbedMode || this.$vuetify.breakpoint.smAndDown || !globalContainer ? 0 : parseInt(globalContainer.height) + parseInt(globalContainer.paddingTop) + parseInt(globalContainer.paddingBottom);
+				const topMargin = this.isEmbedMode ? 0 : parseInt(primaryContainer.marginTop);
+				let viewerHeight = window.innerHeight - contentAreaHeight - globalContainerHeight - topMargin;
 				this.$refs.primarycontainer.style.height = (viewerHeight >= 300 ? viewerHeight : 300) + 'px';
 				if (viewer) {
 					viewer.resize();
@@ -872,17 +892,21 @@ export default {
 			}
 		},
 		async loadRunningJob() {
+			const jobFileName = this.currentJobFileName;
+			if (!jobFileName) {
+				return;
+			}
 			viewer.simulation = false;
-			if (this.selectedFile != this.job.file.fileName) {
+			if (this.selectedFile != jobFileName) {
 				this.selectedFile = '';
 				viewer.gcodeProcessor.setLiveTracking(false);
 				viewer.clearScene(true);
 			}
-			this.selectedFile = this.job.file.fileName;
+			this.selectedFile = jobFileName;
 
 			try {
 				let blob = await this.machineDownload({
-					filename: this.job.file.fileName,
+					filename: jobFileName,
 					type: 'text',
 				});
 
@@ -897,7 +921,9 @@ export default {
 				}
 				this.scrubFileSize = viewer.fileSize;;
 				this.setGCodeValues();
-				viewer.buildObjects.loadObjectBoundaries(this.job.build.objects); //file is loaded lets load the final heights
+				if (this.job?.build?.objects) {
+					viewer.buildObjects.loadObjectBoundaries(this.job.build.objects); //file is loaded lets load the final heights
+				}
 			} finally {
 				viewer.gcodeProcessor.updateFilePosition(0);
 				viewer.gcodeProcessor.forceRedraw();
@@ -929,7 +955,9 @@ export default {
 			viewer.gcodeProcessor.updateFilePosition(this.scrubPosition);
 
 			try {
-				viewer.buildObjects.loadObjectBoundaries(this.job.build.objects);
+				if (this.job?.build?.objects) {
+					viewer.buildObjects.loadObjectBoundaries(this.job.build.objects);
+				}
 			} catch {
 				//console.warn("No objects");
 			}
@@ -960,7 +988,7 @@ export default {
 			this.objectDialogData.info = {};
 		},
 		chooseFile() {
-			if (!this.isBusy) {
+			if (!this.isBusy && this.$refs.fileInput) {
 				this.$refs.fileInput.click();
 			}
 		},
@@ -1171,20 +1199,30 @@ export default {
 		},
 		'showObjectSelection': function (newValue) {
 			if (this.canCancelObject) {
-				viewer.buildObjects.loadObjectBoundaries(this.job.build.objects);
+				if (this.job?.build?.objects) {
+					viewer.buildObjects.loadObjectBoundaries(this.job.build.objects);
+				}
 				viewer.buildObjects.showObjectSelection(newValue);
 			} else {
 				this.showObjectSelection = false;
 				this.hoverLabel = '';
 			}
 		},
-		'isJobRunning': function (newValue) {
-			//Need to add a check for paused...
-			viewer.gcodeProcessor.setLiveTracking(newValue);
-			if (!newValue) {
-				viewer.gcodeProcessor.doFinalPass();
-			}
-		},
+			'isJobRunning': function (newValue) {
+				//Need to add a check for paused...
+				viewer.gcodeProcessor.setLiveTracking(newValue);
+				if (newValue && this.isEmbedMode && this.currentJobFileName && !this.selectedFile) {
+					this.loadRunningJob();
+				}
+				if (!newValue) {
+					viewer.gcodeProcessor.doFinalPass();
+				}
+			},
+			'currentJobFileName': function (to) {
+				if (this.isEmbedMode && this.isJobRunning && to && !this.selectedFile) {
+					this.loadRunningJob();
+				}
+			},
 		'selectedFile': function () {
 			this.showObjectSelection = false;
 			viewer.gcodeProcessor.updateFilePosition(0);

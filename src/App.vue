@@ -1,6 +1,6 @@
 <template>
 	<v-app>
-		<v-navigation-drawer v-if="!showBottomNavigation" v-model="drawer" clipped fixed app
+		<v-navigation-drawer v-if="!showBottomNavigation && !isEmbedMode" v-model="drawer" clipped fixed app
 							 :width="$vuetify.breakpoint.smAndDown ? 275 : 256" :expand-on-hover="iconMenu"
 							 :mini-variant="iconMenu" :style="`padding-bottom: ${bottomMargin}px`">
 			<div class="mb-3 hidden-sm-and-up">
@@ -32,7 +32,7 @@
 			</v-list>
 		</v-navigation-drawer>
 
-		<v-app-bar ref="appToolbar" app clipped-left>
+		<v-app-bar v-if="!isEmbedMode" ref="appToolbar" app clipped-left>
 			<v-app-bar-nav-icon v-show="!showBottomNavigation" @click.stop="drawer = !drawer">
 				<v-icon>mdi-menu</v-icon>
 			</v-app-bar-nav-icon>
@@ -53,15 +53,15 @@
 			<emergency-btn />
 		</v-app-bar>
 
-		<v-main id="content" :style="`margin-bottom: ${bottomMargin}px`">
-			<v-container class="hidden-sm-and-down" id="global-container" fluid>
+		<v-main id="content" :style="mainStyle">
+			<v-container v-if="!isEmbedMode" class="hidden-sm-and-down" id="global-container" fluid>
 				<fff-container-panel v-if="isFFForUnset" />
 				<cnc-container-panel v-else />
 			</v-container>
 
-			<v-divider class="hidden-sm-and-down" />
+			<v-divider v-if="!isEmbedMode" class="hidden-sm-and-down" />
 
-			<v-container fluid>
+			<v-container fluid :class="{ 'pa-0 fill-height': isEmbedMode }">
 				<keep-alive>
 					<router-view />
 				</keep-alive>
@@ -70,7 +70,7 @@
 
 		<notification-display />
 
-		<v-bottom-navigation v-if="showBottomNavigation" app>
+		<v-bottom-navigation v-if="showBottomNavigation && !isEmbedMode" app>
 			<v-menu v-for="(category, index) in categories" :key="index" top offset-y>
 				<template #activator="{ on }">
 					<v-btn v-on="on">
@@ -135,7 +135,7 @@ export default Vue.extend({
 				}
 				return flag;
 			};
-			return Routes.some(route => checkRoute(route as MenuItem));
+			return this.isEmbedMode || Routes.some(route => checkRoute(route as MenuItem));
 		},
 		darkTheme(): boolean { return store.state.settings.darkTheme; },
 		isFFForUnset(): boolean {
@@ -152,6 +152,15 @@ export default Vue.extend({
 		},
 		bottomMargin(): number {
 			return store.state.bottomMargin;
+		},
+		isEmbedMode(): boolean {
+			const isGCodeViewerRoute = this.$route.path === "/Plugins/GCodeViewer" || this.$route.path === "/Plugins/GCodeViewer/embed";
+			const embedParam = this.$route.query.embed;
+			return isGCodeViewerRoute && (this.$route.path.endsWith("/embed") || embedParam === "1" || embedParam === "true");
+		},
+		mainStyle(): string {
+			const marginBottom = this.isEmbedMode ? 0 : this.bottomMargin;
+			return `margin-bottom: ${marginBottom}px`;
 		}
 	},
 	data() {
