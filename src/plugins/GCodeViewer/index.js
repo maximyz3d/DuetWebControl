@@ -4,7 +4,7 @@ import Vue from 'vue';
 
 import i18n from '@/i18n';
 import { registerPluginContextMenuItem, ContextMenuType } from '@/plugins';
-import { registerRoute } from '@/routes';
+import router, { registerRoute } from '@/routes';
 import { registerPluginData, PluginDataType } from '@/store';
 
 import Gauge from './Gauge/gauge.vue';
@@ -27,6 +27,15 @@ registerRoute(GCodeViewer, {
 		},
 	},
 });
+
+router.addRoute({
+	path: '/Plugins/GCodeViewer/embed',
+	component: GCodeViewer,
+});
+
+if (router.currentRoute.path === '/Plugins/GCodeViewer/embed') {
+	router.replace(router.currentRoute.fullPath).catch(() => {});
+}
 
 registerPluginContextMenuItem(() => i18n.t('plugins.gcodeViewer.view3D'), '/Plugins/GCodeViewer', 'mdi-rotate-3d', 'view-3d-model', ContextMenuType.JobFileList);
 registerPluginData('GCodeViewer', PluginDataType.machineCache, 'toolColors', ['#00FFFF', '#FF00FF', '#FFFF00', '#000000', '#FFFFFF']);
