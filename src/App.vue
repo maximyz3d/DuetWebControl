@@ -170,6 +170,20 @@ export default Vue.extend({
 		};
 	},
 	methods: {
+		async ensureGCodeViewerRoute(): Promise<void> {
+			if (this.$route.path !== "/Plugins/GCodeViewer" || Routes.some(route => route.path === "/Plugins/GCodeViewer")) {
+				return;
+			}
+
+			try {
+				await store.dispatch("loadDwcPlugin", { id: "GCodeViewer", saveSettings: false });
+				if (this.$route.path === "/Plugins/GCodeViewer") {
+					await this.$router.replace(this.$route.fullPath);
+				}
+			} catch (e) {
+				console.warn("Failed to auto-load GCodeViewer plugin route", e);
+			}
+		},
 		isExpanded(category: MenuCategory): boolean {
 			if (this.$vuetify.breakpoint.smAndDown) {
 				const route = this.$route;
@@ -193,6 +207,8 @@ export default Vue.extend({
 		},
 	},
 	mounted() {
+		this.ensureGCodeViewerRoute();
+
 		// Attempt to disconnect from every machine when the page is being unloaded
 		window.addEventListener("unload", () => store.dispatch("disconnectAll"));
 
