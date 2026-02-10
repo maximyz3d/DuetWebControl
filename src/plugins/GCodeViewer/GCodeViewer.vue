@@ -854,13 +854,25 @@ export default {
 				clearTimeout(this.resizeDebounce);
 			}
 			this.resizeDebounce = setTimeout(() => {
-				let contentArea = getComputedStyle(document.getElementsByClassName('v-toolbar__content')[0]);
-				let globalContainer =  getComputedStyle(document.getElementById('global-container'));
-				let primaryContainer = getComputedStyle(this.$refs.primarycontainer);
-				let contentAreaHeight = parseInt(contentArea.height) + parseInt(contentArea.paddingTop) + parseInt(contentArea.paddingBottom);
-				let globalContainerHeight = this.$vuetify.breakpoint.smAndDown ? 0 : parseInt(globalContainer.height) + parseInt(globalContainer.paddingTop) + parseInt(globalContainer.paddingBottom);
+				const primaryContainerRef = this.$refs.primarycontainer as HTMLElement | undefined;
+				if (!primaryContainerRef) {
+					return;
+				}
+
+				const contentAreaElement = document.querySelector('.v-toolbar__content') as HTMLElement | null;
+				const globalContainerElement = document.getElementById('global-container');
+				const contentArea = contentAreaElement ? getComputedStyle(contentAreaElement) : null;
+				const globalContainer = globalContainerElement ? getComputedStyle(globalContainerElement) : null;
+				const primaryContainer = getComputedStyle(primaryContainerRef);
+
+				const contentAreaHeight = contentArea
+					? parseInt(contentArea.height) + parseInt(contentArea.paddingTop) + parseInt(contentArea.paddingBottom)
+					: 0;
+				const globalContainerHeight = (!this.$vuetify.breakpoint.smAndDown && globalContainer)
+					? parseInt(globalContainer.height) + parseInt(globalContainer.paddingTop) + parseInt(globalContainer.paddingBottom)
+					: 0;
 				let viewerHeight = window.innerHeight - contentAreaHeight - globalContainerHeight - parseInt(primaryContainer.marginTop);
-				this.$refs.primarycontainer.style.height = (viewerHeight >= 300 ? viewerHeight : 300) + 'px';
+				primaryContainerRef.style.height = (viewerHeight >= 300 ? viewerHeight : 300) + 'px';
 				if (viewer) {
 					viewer.resize();
 				}
