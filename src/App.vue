@@ -1,6 +1,6 @@
 <template>
 	<v-app>
-		<v-navigation-drawer v-if="!showBottomNavigation" v-model="drawer" clipped fixed app
+		<v-navigation-drawer v-if="!isEmbeddedGCodeOnly && !showBottomNavigation" v-model="drawer" clipped fixed app
 							 :width="$vuetify.breakpoint.smAndDown ? 275 : 256" :expand-on-hover="iconMenu"
 							 :mini-variant="iconMenu" :style="`padding-bottom: ${bottomMargin}px`">
 			<div class="mb-3 hidden-sm-and-up">
@@ -32,7 +32,7 @@
 			</v-list>
 		</v-navigation-drawer>
 
-		<v-app-bar ref="appToolbar" app clipped-left>
+		<v-app-bar v-if="!isEmbeddedGCodeOnly" ref="appToolbar" app clipped-left>
 			<v-app-bar-nav-icon v-show="!showBottomNavigation" @click.stop="drawer = !drawer">
 				<v-icon>mdi-menu</v-icon>
 			</v-app-bar-nav-icon>
@@ -53,13 +53,13 @@
 			<emergency-btn />
 		</v-app-bar>
 
-		<v-main id="content" :style="`margin-bottom: ${bottomMargin}px`">
-			<v-container class="hidden-sm-and-down" id="global-container" fluid>
+		<v-main id="content" :style="isEmbeddedGCodeOnly ? '' : `margin-bottom: ${bottomMargin}px`">
+			<v-container v-if="!isEmbeddedGCodeOnly" class="hidden-sm-and-down" id="global-container" fluid>
 				<fff-container-panel v-if="isFFForUnset" />
 				<cnc-container-panel v-else />
 			</v-container>
 
-			<v-divider class="hidden-sm-and-down" />
+			<v-divider v-if="!isEmbeddedGCodeOnly" class="hidden-sm-and-down" />
 
 			<v-container fluid>
 				<keep-alive>
@@ -68,9 +68,9 @@
 			</v-container>
 		</v-main>
 
-		<notification-display />
+		<notification-display v-if="!isEmbeddedGCodeOnly" />
 
-		<v-bottom-navigation v-if="showBottomNavigation" app>
+		<v-bottom-navigation v-if="!isEmbeddedGCodeOnly && showBottomNavigation" app>
 			<v-menu v-for="(category, index) in categories" :key="index" top offset-y>
 				<template #activator="{ on }">
 					<v-btn v-on="on">
@@ -87,12 +87,12 @@
 			</v-menu>
 		</v-bottom-navigation>
 
-		<connect-dialog />
-		<connection-dialog />
-		<file-transfer-dialog />
-		<message-box-dialog />
-		<plugin-install-dialog />
-		<incompatible-versions-dialog />
+		<connect-dialog v-if="!isEmbeddedGCodeOnly" />
+		<connection-dialog v-if="!isEmbeddedGCodeOnly" />
+		<file-transfer-dialog v-if="!isEmbeddedGCodeOnly" />
+		<message-box-dialog v-if="!isEmbeddedGCodeOnly" />
+		<plugin-install-dialog v-if="!isEmbeddedGCodeOnly" />
+		<incompatible-versions-dialog v-if="!isEmbeddedGCodeOnly" />
 
 		<component v-for="component in injectedComponentNames" :is="component" :key="component" />
 	</v-app>
@@ -147,6 +147,14 @@ export default Vue.extend({
 		showBottomNavigation(): boolean {
 			return this.$vuetify.breakpoint.mobile && !this.$vuetify.breakpoint.xsOnly && store.state.settings.bottomNavigation;
 		},
+		isEmbeddedGCodeOnly(): boolean {
+				if (this.$route.path !== "/Plugins/GCodeViewer") {
+					return false;
+				}
+
+				const embedMode = String(this.$route.query.embed || "").toLowerCase();
+				return ["viewer", "gcode", "gcodeviewer", "true", "1"].includes(embedMode);
+		},
 		doNotSwitchToStatusPanelOnJobStart(): boolean {
 			return store.state.settings.behaviour.jobStart; 
 		},
@@ -162,6 +170,20 @@ export default Vue.extend({
 		};
 	},
 	methods: {
+		async ensureGCodeViewerRoute(): Promise<void> {
+			if (this.$route.path !== "/Plugins/GCodeViewer" || Routes.some(route => route.path === "/Plugins/GCodeViewer")) {
+				return;
+			}
+
+			try {
+				await store.dispatch("loadDwcPlugin", { id: "GCodeViewer", saveSettings: false });
+				if (this.$route.path === "/Plugins/GCodeViewer") {
+					await this.$router.replace(this.$route.fullPath);
+				}
+			} catch (e) {
+				console.warn("Failed to auto-load GCodeViewer plugin route", e);
+			}
+		},
 		isExpanded(category: MenuCategory): boolean {
 			if (this.$vuetify.breakpoint.smAndDown) {
 				const route = this.$route;
@@ -185,6 +207,8 @@ export default Vue.extend({
 		},
 	},
 	mounted() {
+		this.ensureGCodeViewerRoute();
+
 		// Attempt to disconnect from every machine when the page is being unloaded
 		window.addEventListener("unload", () => store.dispatch("disconnectAll"));
 
@@ -245,7 +269,7 @@ export default Vue.extend({
 					// Go to Job Status when a print starts
 					if (this.$router.currentRoute.path !== "/Job/Status" && !this.doNotSwitchToStatusPanelOnJobStart) {
 						this.$router.push("/Job/Status");
-					}
+				}
 				} else {
 					// Remove the Piecon again when the print has finished
 					Piecon.reset();

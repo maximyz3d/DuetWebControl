@@ -793,6 +793,17 @@ export default {
 			sendCode: 'sendCode',
 		}),
 
+		hasLoadedGCode() {
+			return Boolean(viewer && viewer.gcodeProcessor && viewer.fileData && viewer.fileData.length > 0);
+		},
+
+		updateFilePositionSafe(position) {
+			if (!this.hasLoadedGCode() || typeof position !== 'number' || Number.isNaN(position)) {
+				return;
+			}
+			viewer.gcodeProcessor.updateFilePosition(position);
+		},
+
 		simulatePlay() {
 			if (this.scrubPlaying) {
 				viewer.stopSimulation();
@@ -808,8 +819,10 @@ export default {
 
 			this.$nextTick(() => {
 				this.scrubPosition = value;
-				viewer.gcodeProcessor.updateFilePosition(value);
-				viewer.simulateToolPosition();
+				this.updateFilePositionSafe(value);
+				if (this.hasLoadedGCode()) {
+					viewer.simulateToolPosition();
+				}
 				viewer.simulation = viewerState;
 			});
 		},
@@ -854,13 +867,25 @@ export default {
 				clearTimeout(this.resizeDebounce);
 			}
 			this.resizeDebounce = setTimeout(() => {
-				let contentArea = getComputedStyle(document.getElementsByClassName('v-toolbar__content')[0]);
-				let globalContainer =  getComputedStyle(document.getElementById('global-container'));
-				let primaryContainer = getComputedStyle(this.$refs.primarycontainer);
-				let contentAreaHeight = parseInt(contentArea.height) + parseInt(contentArea.paddingTop) + parseInt(contentArea.paddingBottom);
-				let globalContainerHeight = this.$vuetify.breakpoint.smAndDown ? 0 : parseInt(globalContainer.height) + parseInt(globalContainer.paddingTop) + parseInt(globalContainer.paddingBottom);
+				const primaryContainerRef = this.$refs.primarycontainer as HTMLElement | undefined;
+				if (!primaryContainerRef) {
+					return;
+				}
+
+				const contentAreaElement = document.querySelector('.v-toolbar__content') as HTMLElement | null;
+				const globalContainerElement = document.getElementById('global-container');
+				const contentArea = contentAreaElement ? getComputedStyle(contentAreaElement) : null;
+				const globalContainer = globalContainerElement ? getComputedStyle(globalContainerElement) : null;
+				const primaryContainer = getComputedStyle(primaryContainerRef);
+
+				const contentAreaHeight = contentArea
+					? parseInt(contentArea.height) + parseInt(contentArea.paddingTop) + parseInt(contentArea.paddingBottom)
+					: 0;
+				const globalContainerHeight = (!this.$vuetify.breakpoint.smAndDown && globalContainer)
+					? parseInt(globalContainer.height) + parseInt(globalContainer.paddingTop) + parseInt(globalContainer.paddingBottom)
+					: 0;
 				let viewerHeight = window.innerHeight - contentAreaHeight - globalContainerHeight - parseInt(primaryContainer.marginTop);
-				this.$refs.primarycontainer.style.height = (viewerHeight >= 300 ? viewerHeight : 300) + 'px';
+				primaryContainerRef.style.height = (viewerHeight >= 300 ? viewerHeight : 300) + 'px';
 				if (viewer) {
 					viewer.resize();
 				}
@@ -899,7 +924,7 @@ export default {
 				this.setGCodeValues();
 				viewer.buildObjects.loadObjectBoundaries(this.job.build.objects); //file is loaded lets load the final heights
 			} finally {
-				viewer.gcodeProcessor.updateFilePosition(0);
+				this.updateFilePositionSafe(0);
 				viewer.gcodeProcessor.forceRedraw();
 				this.loading = false;
 			}
@@ -926,7 +951,7 @@ export default {
 			this.setGCodeValues();
 			
 			viewer.gcodeProcessor.forceRedraw();
-			viewer.gcodeProcessor.updateFilePosition(this.scrubPosition);
+			this.updateFilePositionSafe(this.scrubPosition);
 
 			try {
 				viewer.buildObjects.loadObjectBoundaries(this.job.build.objects);
@@ -1034,7 +1059,7 @@ export default {
 			viewer.stopSimulation();
 			this.scrubPlaying = false;
 			this.scrubPosition = this.scrubFileSize;
-			viewer.gcodeProcessor.updateFilePosition(this.scrubFileSize);
+			this.updateFilePositionSafe(this.scrubFileSize);
 			
 		},
 		updatePosition(){
@@ -1128,7 +1153,7 @@ export default {
 		'filePosition': function (newValue) {
 			if (this.visualizingCurrentJob) {
 				this.scrubPosition = newValue;
-				viewer.gcodeProcessor.updateFilePosition(newValue + 1);
+				this.updateFilePositionSafe(newValue + 1);
 			}
 		},
 		scrubSpeed(to) {
@@ -1187,7 +1212,7 @@ export default {
 		},
 		'selectedFile': function () {
 			this.showObjectSelection = false;
-			viewer.gcodeProcessor.updateFilePosition(0);
+			this.updateFilePositionSafe(0);
 		},
 		'bedRenderMode': function (newValue) {
 			viewer.bed.setRenderMode(newValue);
