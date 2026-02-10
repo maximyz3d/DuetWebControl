@@ -183,28 +183,24 @@
 			<div class="loading-progress">
 				<v-progress-linear :value="loadingProgress" class="disable-transition" height="15" rounded v-show="loading">{{loadingProgress}}% {{loadingMessage}}</v-progress-linear>
 			</div>
-			<div :class="{ 'button-container-drawer': drawer && !isEmbedMode }" class="button-container">
+			<div :class="{ 'button-container-drawer': drawer }" class="button-container">
 				<v-btn :title="$t('plugins.gcodeViewer.fullscreen')" @click="toggleFullScreen" class="full-screen-icon mb-2" color="secondary" small>
 					<v-icon>{{ fullscreen ? 'mdi-window-restore' : 'mdi-window-maximize' }}</v-icon>
 				</v-btn>
 				<br />
-				<v-btn v-if="!isEmbedMode" :title="$t('plugins.gcodeViewer.showConfiguration')" @click="drawer = !drawer" class="toggle-menu-button-close mb-10" color="secondary" small>
+				<v-btn :title="$t('plugins.gcodeViewer.showConfiguration')" @click="drawer = !drawer" class="toggle-menu-button-close mb-10" color="secondary" small>
 					<v-icon>mdi-cog</v-icon>
 				</v-btn>
 				<br />
 				<v-btn :title="$t('plugins.gcodeViewer.loadCurrentJob.title')" @click="loadRunningJob" class="toggle-menu-button-close mb-10" color="secondary" small v-show="!(!isJobRunning || loading || visualizingCurrentJob)">
 					<v-icon>mdi-printer-3d</v-icon>
 				</v-btn>
-				<br v-if="!isEmbedMode" />
-				<v-btn v-if="isEmbedMode" :title="$t('plugins.gcodeViewer.loadLocalGCode.title')" @click="chooseFile" class="toggle-menu-button-close mb-10" color="secondary" small>
-					<v-icon>mdi-file</v-icon>
-				</v-btn>
 				<br />
 				<v-btn :title="$t('plugins.gcodeViewer.cancelLoad')" @click="cancelLoad" class="toggle-menu-button-close" color="warning" small v-show="loading">
 					<v-icon color="red">mdi-cancel</v-icon>
 				</v-btn>
 			</div>
-			<v-navigation-drawer v-if="!isEmbedMode" :permanent="drawer" absolute v-model="drawer" width="350px">
+			<v-navigation-drawer :permanent="drawer" absolute v-model="drawer" width="350px">
 				<v-card>
 					<v-btn :title="$t('plugins.gcodeViewer.resetCamera.title')" @click="reset" block color="primary">
 						<v-icon class="mr-2">mdi-camera</v-icon>
@@ -672,10 +668,6 @@ export default {
 		viewer.fileData = "";
 		await viewer.init();
 
-		if (this.isEmbedMode) {
-			this.drawer = false;
-			this.viewGCode = true;
-		}
 
 		// NEW: initialize camera behavior based on switches
 		if (typeof viewer.setTopFollow === 'function') {
