@@ -1,6 +1,6 @@
 <template>
 	<v-app>
-		<v-navigation-drawer v-if="!showBottomNavigation && !isEmbedMode" v-model="drawer" fixed app
+		<v-navigation-drawer v-if="!showBottomNavigation && !isEmbedMode" v-model="drawer" clipped fixed app
 							 :width="$vuetify.breakpoint.smAndDown ? 275 : 256" :expand-on-hover="iconMenu"
 							 :mini-variant="iconMenu" :style="`padding-bottom: ${bottomMargin}px`">
 			<div class="mb-3 hidden-sm-and-up">
@@ -31,6 +31,27 @@
 				</v-list-group>
 			</v-list>
 		</v-navigation-drawer>
+
+		<v-app-bar v-if="!isEmbedMode" ref="appToolbar" app clipped-left>
+			<v-app-bar-nav-icon v-show="!showBottomNavigation" @click.stop="drawer = !drawer">
+				<v-icon>mdi-menu</v-icon>
+			</v-app-bar-nav-icon>
+			<v-toolbar-title class="px-1">
+				<a href="javascript:void(0)" id="title">
+					{{ name }}
+				</a>
+			</v-toolbar-title>
+			<connect-btn v-if="showConnectButton" class="hidden-xs-only ml-3" />
+
+			<v-spacer />
+
+			<code-input class="mx-3 hidden-sm-and-down" />
+
+			<v-spacer />
+
+			<upload-btn target="start" :elevation="1" class="mr-3 hidden-sm-and-down" />
+			<emergency-btn />
+		</v-app-bar>
 
 		<v-main id="content" :style="mainStyle">
 			<v-container fluid :class="{ 'pa-0 fill-height': isEmbedMode }">
