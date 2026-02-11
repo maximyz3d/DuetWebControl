@@ -260,12 +260,14 @@ export default {
 			}
 
 
-			let contentArea = getComputedStyle(document.getElementsByClassName('v-toolbar__content')[0]);
-				let globalContainer =  getComputedStyle(document.getElementById('global-container'));
-				let primaryContainer = getComputedStyle(this.$refs.container);
-				let contentAreaHeight = parseInt(contentArea.height) + parseInt(contentArea.paddingTop) + parseInt(contentArea.paddingBottom);
-				let globalContainerHeight = this.$vuetify.breakpoint.smAndDown ? 0 : parseInt(globalContainer.height) + parseInt(globalContainer.paddingTop) + parseInt(globalContainer.paddingBottom);
-				let viewerHeight = window.innerHeight - contentAreaHeight - globalContainerHeight - parseInt(primaryContainer.marginTop);
+			const toolbarContent = document.getElementsByClassName('v-toolbar__content')[0];
+			const globalContainerElement = document.getElementById('global-container');
+			const contentArea = toolbarContent ? getComputedStyle(toolbarContent) : null;
+			const globalContainer = globalContainerElement ? getComputedStyle(globalContainerElement) : null;
+			const primaryContainer = getComputedStyle(this.$refs.container);
+			const contentAreaHeight = contentArea ? parseInt(contentArea.height) + parseInt(contentArea.paddingTop) + parseInt(contentArea.paddingBottom) : 0;
+			const globalContainerHeight = this.$vuetify.breakpoint.smAndDown || !globalContainer ? 0 : parseInt(globalContainer.height) + parseInt(globalContainer.paddingTop) + parseInt(globalContainer.paddingBottom);
+			const viewerHeight = window.innerHeight - contentAreaHeight - globalContainerHeight - parseInt(primaryContainer.marginTop);
 
 			if(height > viewerHeight) {
 				height = viewerHeight;
