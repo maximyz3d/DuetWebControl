@@ -33,13 +33,6 @@
 		</v-navigation-drawer>
 
 		<v-main id="content" :style="mainStyle">
-			<v-container v-if="!isEmbedMode" class="hidden-sm-and-down" id="global-container" fluid>
-				<fff-container-panel v-if="isFFForUnset" />
-				<cnc-container-panel v-else />
-			</v-container>
-
-			<v-divider v-if="!isEmbedMode" class="hidden-sm-and-down" />
-
 			<v-container fluid :class="{ 'pa-0 fill-height': isEmbedMode }">
 				<keep-alive>
 					<router-view />
@@ -78,14 +71,13 @@
 </template>
 
 <script lang="ts">
-import ObjectModel, { MachineMode, MachineStatus } from "@duet3d/objectmodel";
+import { MachineStatus } from "@duet3d/objectmodel";
 import Piecon from "piecon";
 import Vue, { Component } from "vue";
 import { Route, NavigationGuardNext } from "vue-router";
 
 import { Menu, MenuCategory, MenuItem, Routes } from "@/routes";
 import store from "@/store";
-import { DashboardMode } from "@/store/settings";
 import { isPrinting } from "@/utils/enums";
 import { LogType } from "./utils/logging";
 
@@ -97,7 +89,6 @@ export default Vue.extend({
 		iconMenu(): boolean { return store.state.settings.iconMenu; },
 		jobProgress(): number { return store.getters["machine/model/jobProgress"]; },
 		injectedComponents(): Array<{ name: string, component: Component }> { return store.state.uiInjection.injectedComponents; },
-		model(): ObjectModel { return store.state.machine.model; },
 		categories(): Array<MenuCategory> {
 			return Object.keys(Menu)
 				.map(key => Menu[key])
@@ -117,12 +108,6 @@ export default Vue.extend({
 			return this.isEmbedMode || Routes.some(route => checkRoute(route as MenuItem));
 		},
 		darkTheme(): boolean { return store.state.settings.darkTheme; },
-		isFFForUnset(): boolean {
-			if (store.state.settings.dashboardMode === DashboardMode.default) {
-				return !this.model.state.machineMode || this.model.state.machineMode === MachineMode.fff;
-			}
-			return store.state.settings.dashboardMode === DashboardMode.fff;
-		},
 		showBottomNavigation(): boolean {
 			return this.$vuetify.breakpoint.mobile && !this.$vuetify.breakpoint.xsOnly && store.state.settings.bottomNavigation;
 		},
