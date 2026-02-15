@@ -103,10 +103,15 @@ export interface SettingsState {
 	 */
 	cacheSaveDelay: number;
 
-	/**
-	 * Hidden menu items
-	 */
-	hiddenMenuItems: Array<string>;
+        /**
+         * Hidden menu items
+         */
+        hiddenMenuItems: Array<string>;
+
+        /**
+         * Whether the admin view is currently unlocked
+         */
+        adminUnlocked: boolean;
 
 	/**
 	 * Notification settings
@@ -194,6 +199,22 @@ export interface SettingsState {
 	plugins: Record<string, any>
 }
 
+export const DefaultHiddenMenuItems: Array<string> = [
+"/Console",
+"/Files/Filaments",
+"/Files/Macros",
+"/Files/System",
+"/Settings/General",
+"/Settings/Machine",
+"/Settings/Plugins",
+"/Plugins/ObjectModel",
+"/Plugins/InputShaping",
+"/Status",
+"/Job/Status",
+"/Job/Webcam",
+"/"
+];
+
 export default {
 	namespaced: true,
 	state: {
@@ -212,10 +233,11 @@ export default {
 
 		settingsStorageLocal: false,
 		settingsSaveDelay: 500,
-		cacheStorageLocal: localStorageSupported,
-		cacheSaveDelay: 1000,
+                cacheStorageLocal: localStorageSupported,
+                cacheSaveDelay: 1000,
 
-		hiddenMenuItems: [],
+                hiddenMenuItems: [...DefaultHiddenMenuItems],
+                adminUnlocked: false,
 
 		notifications: {
 			errorsPersistent: true,
